@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import type { UserEntity } from '@/types/user.entity.ts'
-import type { ErrorResponse } from '@/types/error.entity.ts'
+import type {UpdatedUser, UserEntity} from '@/types/user.entity.ts'
+import type {ErrorResponse, MessageResponse} from '@/types/error.entity.ts'
 import { userService } from '@/api/user.service.ts'
 import { isErrorResponse } from '@/utils/response_type.ts'
 
@@ -26,7 +26,6 @@ export const useUserStore = defineStore('user', {
         // Пришла ошибка ErrorResponse (500)
         if (isErrorResponse(response)) {
           this.error = response.error
-          // TODO: logout
           return null
         }
         // Пришёл ответ User (200)
@@ -35,7 +34,6 @@ export const useUserStore = defineStore('user', {
       }
       catch {
         this.error = 'Ошибка получения данных пользователя, повторите попытку авторизации'
-        // TODO: logout
         return null
       }
       finally {
@@ -90,5 +88,51 @@ export const useUserStore = defineStore('user', {
         this.isLoading = false
       }
     },
+
+    async fetchAllUsers(): Promise<UserEntity[] | null> {
+      try{
+        this.isLoading = true
+        this.error = null
+
+        const response: UserEntity[] | ErrorResponse = await userService.fetchAllUsers()
+
+        if (isErrorResponse(response)) {
+          this.error = response.error
+          return null
+        }
+
+        return response
+      }
+      catch {
+        this.error = 'Ошибка получения пользователей, повторите попытку'
+        return null
+      }
+      finally {
+        this.isLoading = false
+      }
+    },
+
+    async updateUser(req: UpdatedUser): Promise<boolean | null> {
+      try {
+        this.isLoading = true
+        this.error = null
+
+        const response: MessageResponse | ErrorResponse = await userService.updateUser(req)
+        console.log(response)
+        if (isErrorResponse(response)) {
+          this.error = response.error
+          return null
+        }
+
+        return true
+      }
+      catch (err) {
+        this.error = err.toString() || 'Ошибка обновления пользователя, повторите попытку'
+        return null
+      }
+      finally {
+        this.isLoading = false
+      }
+    }
   },
 })

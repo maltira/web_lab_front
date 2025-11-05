@@ -5,12 +5,22 @@ export interface UserEntity {
   name: string;
   email: string;
   password: string;
-  groupID: string;
-  isBlock: boolean;
+  group_iD: string;
+  is_block: boolean;
 
-  lastVisitTime: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  last_visit_at: Date;
+  created_at: Date;
+  updated_at: Date;
 
-  group: GroupEntity;
+  Group: GroupEntity;
+}
+
+export interface UpdatedUser {
+  id: string
+  name?: string
+  email?: string
+  password?: string
+  is_block?: boolean
+  group_id?: string
+  last_visit_time?: Date
 }

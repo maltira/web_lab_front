@@ -1,11 +1,193 @@
 <script setup lang="ts">
+import {useUserStore} from "@/stores/user.store";
+import {onMounted, onUnmounted, ref} from "vue";
+import {storeToRefs} from "pinia";
+import {useNotification} from "@/composables/useNotification";
+import { formatDate } from '@/utils/date_format.ts'
+import Spinner from "@/components/UI/Spinner.vue"
+import {UpdatedUser, UserEntity} from "@/types/user.entity";
 
+const users = ref<UserEntity[]>([])
+const userStore = useUserStore()
+const {user, isLoading, error} = storeToRefs(userStore)
+const { fetchAllUsers, updateUser } = userStore
+const { success, err } = useNotification()
+const openStatusSelect = ref<number | null>(null)
+
+const changeStatusSelect = (index: number) => {
+  if (openStatusSelect.value === index) {
+    openStatusSelect.value = null
+  }
+  else {
+    openStatusSelect.value = index
+  }
+}
+
+const changeUserStatus = async (userID: string, is_block: boolean) => {
+  const newUser: UpdatedUser = {
+    id: userID,
+    is_block: is_block
+  }
+  await updateUser(newUser)
+
+  if (error.value) {
+    err("Ошибка обновления пользователя", error.value.toString())
+  } else {
+    const usrIdx = users.value.findIndex((e) => e.id === userID)
+    users.value[usrIdx].is_block = is_block
+    openStatusSelect.value = null
+    success("Пользователь обновлен", `Вы изменили данные у пользователя с ID: ${userID}`)
+  }
+}
+// Закрытие при клике вне компонента
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  if (!target.closest('.td-status')) {
+    openStatusSelect.value = null
+  }
+}
+
+onMounted(async () => {
+  document.addEventListener('click', handleClickOutside)
+  const list = await fetchAllUsers()
+  if (error.value) {
+    err("Ошибка получения пользователей", error.value.toString())
+  } else {
+    const sortedUsers = [...list].sort((a, b) =>
+        a.Group.name.localeCompare(b.Group.name)
+    );
+    users.value = sortedUsers
+  }
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <template>
-
+  <div class="home_page">
+    <Spinner v-if="isLoading"/>
+    <table v-if="!error && !isLoading && users.length > 0">
+      <tr class="main-row">
+        <td>ID</td>
+        <td>Имя</td>
+        <td>Email</td>
+        <td>Группа</td>
+        <td>Статус</td>
+        <td>Последнее посещение</td>
+      </tr>
+      <tr v-for="(usr, i) in users" :key="i">
+        <td>{{usr.id}}</td>
+        <td>{{usr.name}}</td>
+        <td>{{usr.email}}</td>
+        <td>{{usr.Group.name}}</td>
+        <td class="td-status">
+          <button :class="{'disabled': user.Group.name !== 'Админ', 'block': usr.is_block, 'active-status': openStatusSelect === i}" @click="changeStatusSelect(i)">
+            {{usr.is_block ? "Заблокирован" : "Доступен"}}
+            <img src="/icons/arrow.svg" :class="{'disabled': user.Group.name !== 'Админ'}" alt="arrow" width="16px">
+          </button>
+          <div class="block-status" v-if="openStatusSelect === i" @click.stop>
+            <p :class="{'selected': usr.is_block}" @click="usr.is_block ? null : changeUserStatus(usr.id, true)">Заблокирован</p>
+            <p :class="{'selected': !usr.is_block}" @click="usr.is_block ? changeUserStatus(usr.id, false) : null">Доступен</p>
+          </div>
+        </td>
+        <td>{{formatDate(usr.last_visit_at, 'DD/MM/YYYY HH:mm')}}</td>
+      </tr>
+    </table>
+  </div>
 </template>
 
 <style scoped lang="scss">
+.home_page{
+  margin-top: 80px;
+  padding: 50px 20px;
+}
+table {
+  width: 100%;
+  & > tr {
+    &.main-row{
+      & > td {
+        font-weight: 500;
+        padding: 10px;
+      }
+    }
+    & > td {
+      font-size: 16px;
+      padding: 10px;
+
+      &.td-status{
+        position: relative;
+        & > button {
+          display: flex;
+          width: calc(100% - 30px);
+          justify-content: space-between;
+          align-items: center;
+          border-radius: 32px;
+          padding: 5px 20px;
+          background: #e6fbe7;
+          font-weight: 500;
+          color: #5e9a10;
+          opacity: 0.7;
+          position: relative;
+          z-index: 2;
+          &.block {
+            background: #ffe4db;
+            color: #ff4201;
+          }
+          & > img {
+            opacity: 0.7;
+            transform: translateY(2px);
+
+            &.disabled {
+              display: none;
+            }
+          }
+          &:hover{
+            opacity: 0.8;
+          }
+          &.active-status{
+            opacity: 0.8;
+            z-index: 4;
+          }
+          &.disabled{
+            pointer-events: none;
+            justify-content: start;
+          }
+        }
+        & > .block-status {
+          padding: 10px 0;
+          display: flex;
+          flex-direction: column;
+          position: absolute;
+          background: #f5f5f5;
+          top: 50px;
+          width: calc(100% - 30px);
+          border-radius: 12px;
+          z-index: 3;
+
+          & > p {
+            font-size: 16px;
+            width: 100%;
+            padding: 15px 20px;
+            opacity: 0.8;
+            cursor: pointer;
+            &.selected{
+              opacity: 0.3;
+              pointer-events: none;
+            }
+            &:hover{
+              opacity: 1;
+              background: rgba(gray, 0.1);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+table, th, td {
+  border: 1px solid rgba(gray, 0.1);
+}
 
 </style>

@@ -1,6 +1,6 @@
 import config from '@/config'
-import type { UserEntity } from '@/types/user.entity.ts'
-import type { ErrorResponse } from '@/types/error.entity.ts'
+import type {UpdatedUser, UserEntity} from '@/types/user.entity.ts'
+import type {ErrorResponse, MessageResponse} from '@/types/error.entity.ts'
 
 class UserService {
   private baseURL: string = config.apiUrl
@@ -9,6 +9,7 @@ class UserService {
   async fetchCurrentUser(): Promise<UserEntity | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/user`, {
       method: 'GET',
+      credentials: "include"
     })
     return response.json()
   }
@@ -16,6 +17,7 @@ class UserService {
   async fetchUserByID(id: string): Promise<UserEntity | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/user/${id}`, {
       method: 'GET',
+      credentials: "include"
     })
     return response.json()
   }
@@ -23,6 +25,24 @@ class UserService {
   async fetchUserByEmail(email: string): Promise<UserEntity | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/user/email/${email}`, {
       method: 'GET',
+      credentials: "include"
+    })
+    return response.json()
+  }
+
+  async fetchAllUsers(): Promise<UserEntity[] | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/user/all`, {
+      method: 'GET',
+      credentials: "include"
+    })
+    return response.json()
+  }
+
+  async updateUser(req: UpdatedUser): Promise<MessageResponse | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/user`, {
+      method: 'PUT',
+      credentials: "include",
+      body: JSON.stringify(req),
     })
     return response.json()
   }

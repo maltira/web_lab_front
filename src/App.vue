@@ -17,7 +17,6 @@ const hideHeader = computed(() => {
 
 onMounted(async () => {
   await initApp()
-  success("Страница инициализирована", "Сервис полностью готов к работе")
 })
 </script>
 

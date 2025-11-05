@@ -6,7 +6,7 @@ body {
           'Helvetica Neue',
           sans-serif;
   font-size: 18px;
-  color: black;
+  color: $black-primary;
   line-height: 1.1;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -31,7 +31,7 @@ body {
 
 a, a:link, a:visited  {
   text-decoration: none;
-  color: black;
+  color: $black-primary;
 }
 
 a:hover  {

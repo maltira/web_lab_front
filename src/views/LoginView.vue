@@ -1,10 +1,40 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import {useAuthStore} from "@/stores/auth.store";
+import {AuthRequest} from "@/types/auth.entity";
+import {storeToRefs} from "pinia";
+import {useNotification} from "@/composables/useNotification";
+import {useRouter} from "vue-router";
+import Spinner from '@/components/UI/Spinner.vue'
 
+const router = useRouter()
 const email = ref("")
 const password = ref("")
 const isPasswordVisible = ref(false)
+const authStore = useAuthStore()
+const { isLoading, error } = storeToRefs(authStore)
+const { login } = authStore
+const { success, err } = useNotification()
 
+const auth = async () => {
+  if (email.value && password.value) {
+    const req: AuthRequest = {
+      email: email.value,
+      password: password.value
+    }
+    await login(req)
+
+    if (error.value) {
+      err("Ошибка авторизациии", error.value.toString())
+    }
+    else {
+      await router.push('/')
+      success("Успешная авторизация", "Добро пожаловать")
+    }
+  } else {
+    err("Неверные данные", "Введите корректные данные")
+  }
+}
 </script>
 
 <template>
@@ -16,18 +46,19 @@ const isPasswordVisible = ref(false)
       </div>
       <div class="login_inputs">
         <div class="input_item">
-          <p>Email адрес</p>
-          <input id="email-input" name="email" v-model="email" autocomplete="off" required type="email" placeholder="Введите почту"/>
+          <input id="email-input" name="email" v-model="email" autocomplete="off" required type="email" placeholder="example@gmail.com"/>
         </div>
         <div class="input_item">
-          <p>Пароль</p>
           <div class="password-input">
             <input id="password-input" name="password" v-model="password" autocomplete="off" required :type="isPasswordVisible ? 'text' : 'password'" placeholder="Введите пароль"/>
             <img :src="isPasswordVisible ? '/icons/eye.svg' : '/icons/eye-closed.svg'" alt="visible" @click="isPasswordVisible = !isPasswordVisible">
           </div>
         </div>
       </div>
-      <button class="login_submit">Войти</button>
+      <button class="login_submit" @click="auth" :class="{'disabled': !email || !password || isLoading}">
+        Войти
+        <Spinner size="small" v-if="isLoading"/>
+      </button>
     </div>
   </div>
 </template>
@@ -111,9 +142,16 @@ const isPasswordVisible = ref(false)
   font-weight: 500;
   border-radius: 12px;
   color: $white-primary;
-
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
   &:hover {
     background: rgba($blue-primary, 0.8);
+  }
+  &.disabled{
+    opacity: 0.2;
+    pointer-events: none;
   }
 }
 </style>

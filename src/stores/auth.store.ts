@@ -35,6 +35,7 @@ export const useAuthStore = defineStore('auth', {
           return null
         }
 
+
         // Удачно получили пользователя
         this.isAuthenticated = true
         this.token = response.token
@@ -63,8 +64,6 @@ export const useAuthStore = defineStore('auth', {
         this.isAuthenticated = false
         this.token = null
         userStore.user = null
-
-        console.log("Logout")
 
         // Успешный выход
         return true
