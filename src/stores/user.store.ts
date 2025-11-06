@@ -96,7 +96,6 @@ export const useUserStore = defineStore('user', {
         this.error = null
 
         const response: UserEntity[] | ErrorResponse = await userService.fetchAllUsers()
-
         if (isErrorResponse(response)) {
           this.error = response.error
           return null
@@ -125,7 +124,7 @@ export const useUserStore = defineStore('user', {
         this.error = null
 
         const response: MessageResponse | ErrorResponse = await userService.updateUser(req)
-
+        console.log(response)
         if (isErrorResponse(response)) {
           this.error = response.error
           return null

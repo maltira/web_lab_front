@@ -1,19 +1,46 @@
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import type { UpdatedUser, UserEntity } from '@/types/user.entity.ts'
+import Spinner from '@/components/UI/Spinner.vue'
+import { useUserStore } from '@/stores/user.store.ts'
+import { storeToRefs } from 'pinia'
 
-import { watch } from 'vue'
-import type { UserEntity } from '@/types/user.entity.ts'
+const userStore = useUserStore()
+const { isLoading } = storeToRefs(userStore)
 
 interface Props {
-  isOpen: boolean,
+  isOpen: boolean
   user: UserEntity | null
+  updateUser: (req: UpdatedUser) => Promise<void>
 }
 const props = defineProps<Props>()
+
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const group = ref('')
+const isPasswordVisible = ref(false)
 
 // обращение к родителю
 const emit = defineEmits<{ close: [] }>()
 const handleClose = () => {
+  email.value = ''
+  name.value = ''
+  password.value = ''
+  group.value = ''
   emit('close')
 }
+
+const isUpdateAvailable = computed(() => {
+  if (props.user) {
+    return (
+      (name.value != '' && name.value != props.user.name) ||
+      (email.value != '' && email.value != props.user.email) ||
+      password.value != '' ||
+      (group.value != '' && group.value != props.user.group_id)
+    )
+  } else return false
+})
 
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && props.isOpen) {
@@ -21,29 +48,88 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 }
 
-// слежка за isOpen
-watch(() => props.isOpen, (newValue) => {
-  if (newValue) {
-    document.addEventListener('keydown', handleKeydown)
-  } else {
-    document.removeEventListener('keydown', handleKeydown)
+const UpdateUser = async () => {
+  if (isUpdateAvailable && props.user) {
+    const req: UpdatedUser = {
+      id: props.user.id
+    }
+    if (email.value != "" && props.user && props.user.email)
+      req.email = email.value
+    if (name.value != "" && props.user && props.user.name)
+      req.name = name.value
+    if (password.value != "")
+      req.password = password.value
+    if (group.value != "" && props.user && props.user.group_id)
+      req.group_id = group.value
+
+    if (req.email || req.name || req.password || req.group_id)
+      await props.updateUser(req)
+      handleClose()
   }
-})
+}
+
+// слежка за isOpen
+watch(
+  () => props.isOpen,
+  (newValue) => {
+    if (newValue) {
+      document.addEventListener('keydown', handleKeydown)
+    } else {
+      document.removeEventListener('keydown', handleKeydown)
+    }
+  },
+)
 </script>
 
 <template>
-  <div class="modal-container" :class="{active: isOpen}" @click="handleClose">
+  <div class="modal-container" :class="{ active: isOpen }" @click="handleClose">
     <div class="modal-content" @click.stop>
       <div class="modal-close-button">
-        <img src="/icons/close.svg" @click="handleClose"  alt="close" width="28px">
+        <img src="/icons/close.svg" @click="handleClose" alt="close" width="28px" />
       </div>
       <div class="modal-header">
         <h1>Обновить данные</h1>
         <p>Укажите новые данные для пользователя</p>
       </div>
+      <div class="modal-body">
+        <input
+          v-model="name"
+          required
+          type="text"
+          :placeholder="props.user ? props.user.name : 'Unknown'"
+        />
+        <input
+          v-model="email"
+          required
+          type="email"
+          :placeholder="props.user ? props.user.email : 'Unknown'"
+        />
+        <div class="password-input">
+          <input
+            v-model="password"
+            required
+            :type="isPasswordVisible ? 'text' : 'password'"
+            placeholder="Новый пароль"
+          />
+          <img
+            :src="isPasswordVisible ? '/icons/eye-closed.svg' : '/icons/eye.svg'"
+            alt="visible"
+            @click="isPasswordVisible = !isPasswordVisible"
+          />
+        </div>
+        <input
+          v-model="group"
+          required
+          type="text"
+          :placeholder="props.user ? props.user.group_id : 'Unknown'"
+        />
+      </div>
       <div class="modal-actions">
-        <button class="submit_action">Обновить</button>
-        <button class="cancel_action" @click="handleClose" >Отмена</button>
+        <button class="submit_action" :class="{ disabled: !isUpdateAvailable || isLoading }" @click="isUpdateAvailable ? UpdateUser() : null">
+          {{ !isLoading ? 'Обновить' : '' }}
+          <Spinner size="small" v-if="isLoading" />
+        </button>
+        <button class="cancel_action" @click="handleClose">Отмена</button>
       </div>
     </div>
   </div>
@@ -67,7 +153,7 @@ watch(() => props.isOpen, (newValue) => {
   justify-content: center;
 
   &.active {
-    background-color: rgba(0, 0, 0, .1);
+    background-color: rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(4px);
     visibility: visible;
     opacity: 1;
@@ -84,7 +170,7 @@ watch(() => props.isOpen, (newValue) => {
 
   border-radius: 16px;
 
-  & > .modal-header{
+  & > .modal-header {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -99,7 +185,7 @@ watch(() => props.isOpen, (newValue) => {
     }
   }
 
-  & > .modal-actions{
+  & > .modal-actions {
     display: flex;
     gap: 20px;
 
@@ -107,27 +193,61 @@ watch(() => props.isOpen, (newValue) => {
       width: 100%;
       padding: 8px;
       border-radius: 12px;
-      &.submit_action{
+      &.submit_action {
         color: $white-primary;
         background-color: $black-primary;
 
-        &:hover{
+        &.disabled {
+          opacity: 0.2;
+          pointer-events: none;
+        }
+        &:hover {
           opacity: 0.9;
         }
       }
-      &.cancel_action{
+      &.cancel_action {
         color: $black-primary;
         border: 1px solid rgba($black-primary, 1);
         opacity: 0.7;
 
-        &:hover{
+        &:hover {
           opacity: 1;
         }
       }
     }
   }
 }
-.modal-close-button{
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  & > input,
+  & > div > input {
+    width: 100%;
+    height: 48px;
+    padding: 0 15px;
+    border-radius: 12px;
+    background: rgba(gray, 0.1);
+  }
+  & > .password-input {
+    position: relative;
+    & > img {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      z-index: 2;
+      opacity: 0.5;
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+  }
+}
+.modal-close-button {
   cursor: pointer;
   padding: 4px;
   border-radius: 32px;
@@ -137,7 +257,7 @@ watch(() => props.isOpen, (newValue) => {
   right: calc(-36px - 12px);
 
   opacity: 0.6;
-  &:hover{
+  &:hover {
     opacity: 0.8;
   }
   & > img {

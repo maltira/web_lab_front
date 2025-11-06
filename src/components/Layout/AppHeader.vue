@@ -33,9 +33,7 @@ const createNewUser = async (req: CreateUserRequest) => {
     err('Ошибка создания пользователя', error.value.toString())
   }
   else {
-    isNewRecordModalOpen.value = false
     success("Успешная операция", "Вы добавили нового пользователя в базу данных")
-
     await fetchAllUsers()
   }
 }

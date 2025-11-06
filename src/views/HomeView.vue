@@ -25,6 +25,8 @@ const toggleDeleteModal = (user: UserEntity) => {
 
   if (isDeleteModalOpen.value) {
     userDeleting.value = user
+  } else {
+    userDeleting.value = null
   }
 }
 
@@ -33,6 +35,8 @@ const toggleEditModal = (user: UserEntity) => {
 
   if (isEditModalOpen.value) {
     userEditing.value = user
+  } else {
+    userEditing.value = null
   }
 }
 
@@ -64,6 +68,21 @@ const changeUserStatus = async (userID: string, is_block: boolean) => {
     }
     openStatusSelect.value = null
     success('Пользователь обновлен', `Вы изменили данные у пользователя с ID: ${userID}`)
+  }
+}
+
+const changeUser = async (req: UpdatedUser) => {
+  console.log(req)
+  await updateUser(req)
+  if (error.value) {
+    err('Ошибка обновления пользователя', error.value.toString())
+  }
+  else if (!users.value) {
+    err('Ошибка обновления пользователя', "Список пользователей пуст")
+  }
+  else {
+    success('Пользователь обновлен', `Вы изменили данные у пользователя с ID: ${req.id}`)
+    await fetchAllUsers()
   }
 }
 
@@ -167,7 +186,7 @@ onUnmounted(() => {
   </div>
 
   <DeleteModal :is-open="isDeleteModalOpen" :user="userDeleting" :on-user-delete="deleteUserByID" @close="isDeleteModalOpen = false"/>
-  <EditModal :is-open="isEditModalOpen" :user="userEditing" @close="isEditModalOpen = false"/>
+  <EditModal :is-open="isEditModalOpen" :user="userEditing" :update-user="changeUser" @close="isEditModalOpen = false"/>
 </template>
 
 <style scoped lang="scss">

@@ -5,7 +5,7 @@ export interface UserEntity {
   name: string;
   email: string;
   password: string;
-  group_iD: string;
+  group_id: string;
   is_block: boolean;
 
   last_visit_at: Date;

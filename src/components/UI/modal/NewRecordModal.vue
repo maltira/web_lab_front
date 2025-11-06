@@ -50,6 +50,7 @@ const CreateUser = async () => {
       group_id: group.value,
     }
     await props.createUser(req)
+    handleClose()
   }
 }
 
@@ -176,6 +177,34 @@ watch(() => props.isOpen, (newValue) => {
   }
 }
 .modal-body{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  & > input, & > div > input {
+    width: 100%;
+    height: 48px;
+    padding: 0 15px;
+    border-radius: 12px;
+    background: rgba(gray, 0.1);
+  }
+  & > .password-input{
+    position: relative;
+    & > img {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      z-index: 2;
+      opacity: 0.5;
+
+      &:hover{
+        opacity: 0.7;
+      }
+    }
+  }
+}.modal-body{
   display: flex;
   flex-direction: column;
   gap: 10px;
