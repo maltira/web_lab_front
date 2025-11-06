@@ -5,6 +5,10 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user.store.ts'
 import Spinner from '@/components/UI/Spinner.vue'
 import type { CreateUserRequest } from '@/types/user.entity.ts'
+import { useThemeStore } from '@/stores/theme.store.ts'
+
+const themeStore = useThemeStore()
+const { theme } = storeToRefs(themeStore)
 
 const userStore = useUserStore()
 const { isLoading } = storeToRefs(userStore)
@@ -65,7 +69,7 @@ watch(() => props.isOpen, (newValue) => {
 </script>
 
 <template>
-  <div class="modal-container" :class="{active: isOpen}" @click="handleClose">
+  <div class="modal-container" :class="{active: isOpen, 'dark-theme': theme === 'dark'}" @click="handleClose">
     <div class="modal-content" @click.stop>
       <div class="modal-close-button">
         <img src="/icons/close.svg" @click="handleClose"  alt="close" width="28px">
@@ -84,11 +88,28 @@ watch(() => props.isOpen, (newValue) => {
         <input v-model="group" required type="text" placeholder="Выберите группу">
       </div>
       <div class="modal-actions">
-        <button class="submit_action" @click="CreateUser" :class="{'disabled': !isCreateAvailable || isLoading}">
+        <button
+          class="submit_action"
+          @click="CreateUser"
+          :class="{'disabled': !isCreateAvailable || isLoading}"
+          :style="{
+            background: theme === 'dark' ? 'var(--white-primary)' : 'var(--black-primary)',
+            color: theme === 'dark' ? 'var(--black-primary)' : 'var(--white-primary)',
+          }"
+        >
           {{!isLoading ? "Добавить" : ""}}
           <Spinner size="small" v-if="isLoading"/>
         </button>
-        <button class="cancel_action" @click="handleClose">Отмена</button>
+        <button
+          class="cancel_action"
+          @click="handleClose"
+          :style="{
+            border: theme === 'dark' ? '1px solid var(--white-primary)' : '1px solid var(--black-primary)',
+            color: theme === 'dark' ? 'var(--white-primary)' : 'var(--black-primary)',
+          }"
+        >
+          Отмена
+        </button>
       </div>
     </div>
   </div>
@@ -112,17 +133,21 @@ watch(() => props.isOpen, (newValue) => {
   justify-content: center;
 
   &.active {
-    background-color: rgba(0, 0, 0, .1);
+    background-color: rgba(black, .1);
     backdrop-filter: blur(4px);
     visibility: visible;
     opacity: 1;
+
+    &.dark-theme {
+      background: rgba(white, 0.1);
+    }
   }
 }
 .modal-content {
   display: flex;
   flex-direction: column;
   gap: 35px;
-  background: $white-primary;
+  background: $background-color;
   width: 500px;
   position: relative;
   padding: 40px;

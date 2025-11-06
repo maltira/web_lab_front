@@ -1,3 +1,21 @@
-$black-primary: #101010;
-$white-primary: #ffffff;
+:root {
+  --black-primary: #101010;
+  --white-primary: #ffffff;
+
+  --backgroung-color: #ffffff;
+  --text-primary: var(--black-primary);
+}
+
+:root.dark-theme {
+  --black-primary: #101010;
+  --white-primary: #ffffff;
+
+  --backgroung-color: #171717;
+  --text-primary: var(--white-primary);
+}
+
+$black-primary: var(--black-primary);
+$white-primary: var(--white-primary);
 $blue-primary: #3b82f6;
+$background-color: var(--backgroung-color);
+$text-primary: var(--text-primary);

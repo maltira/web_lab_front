@@ -4,6 +4,10 @@ import type { UserEntity } from '@/types/user.entity.ts'
 import { useUserStore } from '@/stores/user.store.ts'
 import { storeToRefs } from 'pinia'
 import Spinner from '@/components/UI/Spinner.vue'
+import { useThemeStore } from '@/stores/theme.store.ts'
+
+const themeStore = useThemeStore()
+const { theme } = storeToRefs(themeStore)
 
 const userStore = useUserStore()
 const { isLoading } = storeToRefs(userStore)
@@ -38,7 +42,7 @@ watch(() => props.isOpen, (newValue) => {
 </script>
 
 <template>
-  <div class="modal-container" :class="{active: isOpen}" @click="handleClose">
+  <div class="modal-container" :class="{active: isOpen, 'dark-theme': theme === 'dark'}" @click="handleClose">
     <div class="modal-content" @click.stop>
       <div class="modal-close-button">
         <img src="/icons/close.svg" @click="handleClose"  alt="close" width="30px">
@@ -55,11 +59,28 @@ watch(() => props.isOpen, (newValue) => {
         <p>Статус: {{user ? (user.is_block ? "Заблокирован" : "Доступен") : "Unknown"}}</p>
       </div>
       <div class="modal-actions">
-        <button class="submit_action" :class="{'disabled': isLoading}" @click="onUserDelete(user!.id)">
+        <button
+          class="submit_action"
+          :class="{'disabled': isLoading}"
+          @click="onUserDelete(user!.id)"
+          :style="{
+            background: theme === 'dark' ? 'var(--white-primary)' : 'var(--black-primary)',
+            color: theme === 'dark' ? 'var(--black-primary)' : 'var(--white-primary)',
+          }"
+        >
           {{!isLoading ? "Удалить" : ""}}
           <Spinner size="small" v-if="isLoading"/>
         </button>
-        <button class="cancel_action" @click="handleClose" >Отмена</button>
+        <button
+          class="cancel_action"
+          @click="handleClose"
+          :style="{
+            border: theme === 'dark' ? '1px solid var(--white-primary)' : '1px solid var(--black-primary)',
+            color: theme === 'dark' ? 'var(--white-primary)' : 'var(--black-primary)',
+          }"
+        >
+          Отмена
+        </button>
       </div>
     </div>
   </div>
@@ -83,17 +104,21 @@ watch(() => props.isOpen, (newValue) => {
   justify-content: center;
 
   &.active {
-    background-color: rgba(0, 0, 0, .1);
+    background: rgba(black, 0.1);
     backdrop-filter: blur(4px);
     visibility: visible;
     opacity: 1;
+
+    &.dark-theme {
+      background: rgba(white, 0.1);
+    }
   }
 }
 .modal-content {
   display: flex;
   flex-direction: column;
   gap: 35px;
-  background: $white-primary;
+  background: $background-color;
   width: 500px;
   position: relative;
   padding: 40px;
@@ -123,6 +148,7 @@ watch(() => props.isOpen, (newValue) => {
       width: 100%;
       padding: 8px;
       border-radius: 12px;
+
       &.submit_action{
         color: $white-primary;
         background-color: $black-primary;

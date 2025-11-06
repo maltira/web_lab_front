@@ -8,13 +8,32 @@ import { isErrorResponse } from '@/utils/response_type.ts'
 export const useUserStore = defineStore('user', {
   state: () => ({
     user: null as UserEntity | null,
-    users: [] as UserEntity[] | null,
+    users: [] as UserEntity[],
     isLoading: false,
     error: null as string | null,
+    searchQuery: null as string | null
   }),
+  getters: {
+    filteredUsers: (state) => {
+      if (!state.searchQuery)
+        return state.users
+
+      const query = state.searchQuery.toLowerCase()
+
+      return state.users.filter(user =>
+        user.id.includes(query) ||
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        user.Group.name.toLowerCase().includes(query)
+      )
+    }
+  },
   actions: {
     setUser(user: UserEntity) {
       this.user = user
+    },
+    setSearchQuery(query: string) {
+      this.searchQuery = query
     },
 
     async fetchCurrentUser(): Promise<UserEntity | null> {
@@ -102,9 +121,6 @@ export const useUserStore = defineStore('user', {
         }
         if (response.length > 0) {
           this.users = [...response].sort((a, b) => a.Group.name.localeCompare(b.Group.name))
-        }
-        else {
-          this.users = null
         }
 
         return response

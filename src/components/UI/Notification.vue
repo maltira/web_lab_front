@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { useNotification } from '@/composables/useNotification.ts'
+import { storeToRefs } from 'pinia'
+import { useThemeStore } from '@/stores/theme.store.ts'
+
+const themeStore = useThemeStore()
+const { theme } = storeToRefs(themeStore)
 
 const { notifications, removeNotification } = useNotification()
 
@@ -14,8 +19,8 @@ const handleClose = (id: number) => {
       <div class="not_info">
         <img v-if="notification.type != 'info'" :src="`/icons/check-${notification.type}.svg`" width="32px" alt="check">
         <div class="not_info__content">
-          <p class="title">{{notification.title}}</p>
-          <p class="desc">{{notification.description}}</p>
+          <p class="title" :style="{color: theme === 'dark' ? 'black' : 'white'}">{{notification.title}}</p>
+          <p class="desc" :style="{color: theme === 'dark' ? 'black' : 'white'}">{{notification.description}}</p>
         </div>
       </div>
       <div class="img-container" @click="handleClose(notification.id)">

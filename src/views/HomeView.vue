@@ -8,11 +8,16 @@ import Spinner from '@/components/UI/Spinner.vue'
 import type { UpdatedUser, UserEntity } from '@/types/user.entity.ts'
 import DeleteModal from '@/components/UI/modal/DeleteModal.vue'
 import EditModal from '@/components/UI/modal/EditModal.vue'
+import { useThemeStore } from '@/stores/theme.store.ts'
+
+const themeStore = useThemeStore()
+const { theme } = storeToRefs(themeStore)
 
 const userStore = useUserStore()
-const { user, users, isLoading, error } = storeToRefs(userStore)
-const { fetchAllUsers, updateUser, deleteUser } = userStore
+const { user, users, isLoading, error, filteredUsers, searchQuery } = storeToRefs(userStore)
+const { fetchAllUsers, updateUser, deleteUser, setSearchQuery } = userStore
 const { success, err } = useNotification()
+
 const openStatusSelect = ref<number | null>(null)
 
 const isEditModalOpen = ref(false)
@@ -126,7 +131,11 @@ onUnmounted(() => {
 <template>
   <div class="home_page">
     <Spinner v-if="isLoading" />
-    <table v-if="!error && !isLoading && users && users.length > 0">
+    <div class="search-result-header" v-if="searchQuery">
+      <p @click="setSearchQuery('')">← Вернуться назад</p>
+      <h1>Записи по запросу «{{searchQuery}}»</h1>
+    </div>
+    <table v-if="!error && !isLoading && filteredUsers && filteredUsers.length > 0">
       <thead>
         <tr class="main-row">
           <td>ID</td>
@@ -140,7 +149,7 @@ onUnmounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(usr, i) in users" :key="i">
+        <tr v-for="(usr, i) in filteredUsers" :key="i">
           <td>{{ usr.id }}</td>
           <td>{{ usr.name }}</td>
           <td>{{ usr.email }}</td>
@@ -151,6 +160,7 @@ onUnmounted(() => {
                 disabled: user && user.Group.name !== 'Админ',
                 block: usr.is_block,
                 'active-status': openStatusSelect === i,
+                'dark-theme': theme === 'dark'
               }"
               @click="changeStatusSelect(i)"
             >
@@ -178,11 +188,12 @@ onUnmounted(() => {
             </div>
           </td>
           <td>{{ formatDate(usr.last_visit_at, 'DD/MM/YYYY HH:mm') }}</td>
-          <td v-if="user && user.Group.name === 'Админ'" class="action"><img @click="toggleEditModal(usr)" src="/icons/edit.svg" alt="edit"></td>
-          <td v-if="user && user.Group.name === 'Админ'" class="action" ><img @click="toggleDeleteModal(usr)" src="/icons/delete.svg" alt="del"></td>
+          <td v-if="user && user.Group.name === 'Админ'" class="action"><img @click="toggleEditModal(usr)" :src="theme === 'dark' ? '/icons/edit-white.svg' : '/icons/edit.svg'" alt="edit"></td>
+          <td v-if="user && user.Group.name === 'Админ'" class="action" ><img @click="toggleDeleteModal(usr)" :src="theme === 'dark' ? '/icons/delete-white.svg' : '/icons/delete.svg'" alt="del"></td>
         </tr>
       </tbody>
     </table>
+    <p v-else class="search-result-none">Ничего не найдено</p>
   </div>
 
   <DeleteModal :is-open="isDeleteModalOpen" :user="userDeleting" :on-user-delete="deleteUserByID" @close="isDeleteModalOpen = false"/>
@@ -211,6 +222,7 @@ table {
         position: relative;
         width: 1%;
         white-space: nowrap;
+
         & > button {
           display: flex;
           width: 250px;
@@ -224,6 +236,12 @@ table {
           opacity: 0.7;
           position: relative;
           z-index: 2;
+
+          &.dark-theme {
+            opacity: 0.9;
+
+
+          }
           &.block {
             background: #ffe4db;
             color: #ff4201;
@@ -248,6 +266,7 @@ table {
             justify-content: start;
           }
         }
+
         & > .block-status {
           padding: 10px 0;
           display: flex;
@@ -265,6 +284,8 @@ table {
             padding: 15px 20px;
             opacity: 0.8;
             cursor: pointer;
+            color: $black-primary;
+
             &.selected {
               opacity: 0.3;
               pointer-events: none;
@@ -295,5 +316,32 @@ table, th, td {
       opacity: 0.9;
     }
   }
+}
+
+.search-result-header{
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+  margin-bottom: 35px;
+  & > h1 {
+    font-size: 28px;
+  }
+  & > p {
+    font-size: 16px;
+    opacity: 0.7;
+    cursor: pointer;
+
+    &:hover{
+      opacity: 0.9;
+    }
+  }
+}
+.search-result-none{
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.7;
+  padding: 10px;
 }
 </style>
