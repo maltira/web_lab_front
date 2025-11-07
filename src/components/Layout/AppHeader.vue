@@ -4,19 +4,18 @@ import {useRouter} from "vue-router";
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user.store.ts'
 import { onMounted, ref } from 'vue'
-import NewRecordModal from '@/components/UI/modal/NewRecordModal.vue'
-import type { CreateUserRequest } from '@/types/user.entity.ts'
-import { useNotification } from '@/composables/useNotification.ts'
 import { useThemeStore } from '@/stores/theme.store.ts'
+import { usePublicationStore } from '@/stores/publication.store.ts'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
+const publicationStore = usePublicationStore()
 
-const { user, error } = storeToRefs(userStore)
 const { logout } = authStore
-const { createUser, fetchAllUsers, setSearchQuery } = userStore
+const { setSearchQuery } = publicationStore
+const { user} = storeToRefs(userStore)
 const { theme } = storeToRefs(themeStore)
 const { toggleTheme } = themeStore
 
@@ -24,28 +23,11 @@ const isSearchOpen = ref(false)
 const search = ref("")
 const isDarkTheme = ref(false)
 
-const isNewRecordModalOpen = ref(false)
-const { success, err } = useNotification()
-
-const toggleNewRecordModal = () => {
-  isNewRecordModalOpen.value = !isNewRecordModalOpen.value
-}
-
 const LogOut = async () => {
   await logout()
   await router.push("/auth")
 }
 
-const createNewUser = async (req: CreateUserRequest) => {
-  await createUser(req)
-  if (error.value) {
-    err('Ошибка создания пользователя', error.value.toString())
-  }
-  else {
-    success("Успешная операция", "Вы добавили нового пользователя в базу данных")
-    await fetchAllUsers()
-  }
-}
 const toggleSearch = () => {
   const searchInput = document.getElementById('search-input')
   isSearchOpen.value = !isSearchOpen.value
@@ -54,7 +36,8 @@ const toggleSearch = () => {
     searchInput.focus()
   }
 }
-const handleSearch = () => {
+
+const handleSearch = async () => {
   const searchInput = document.getElementById('search-input')
   isSearchOpen.value = false
   if (searchInput) {
@@ -62,6 +45,7 @@ const handleSearch = () => {
   }
 
   if (search.value) {
+    await router.push('/')
     setSearchQuery(search.value)
     search.value = ""
   }
@@ -96,11 +80,11 @@ onMounted(() => {
       }"></div>
     </div>
     <div class="buttons-header">
-      <form autocomplete="off" @submit.prevent="handleSearch" class="button search-record" @click="toggleSearch">
+      <form autocomplete="off" @submit.prevent="handleSearch" class="button search-record" :class="{active: isSearchOpen}" @click="toggleSearch">
         <img :src=" theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'" alt="add">
         <input
           id="search-input"
-          placeholder="Найти запись"
+          placeholder="Поиск публикаций"
           autocomplete="off"
           type="text"
           name="search"
@@ -108,20 +92,15 @@ onMounted(() => {
           v-model="search"
         >
       </form>
-      <RouterLink to="/publications" class="button publics">
-        Публикации
+      <RouterLink v-if="user && user.Group.name === 'Админ'" to="/admin" class="button admin">
+        Админ-панель
       </RouterLink>
-      <button v-if="user && user.Group.name === 'Админ'" @click="toggleNewRecordModal" class="button new-record">
-        <img :src=" theme === 'dark' ? '/icons/add-white.svg' : '/icons/add.svg'" alt="add">
-        Новая запись
-      </button>
       <button class="button exit-button" @click="LogOut">
         <img :src=" theme === 'dark' ? '/icons/exit-white.svg' : '/icons/exit.svg'" alt="exit">
         Выйти
       </button>
     </div>
   </div>
-  <NewRecordModal :is-open="isNewRecordModalOpen" :create-user="createNewUser" @close="isNewRecordModalOpen = false"/>
 </template>
 
 <style scoped lang="scss">
@@ -136,8 +115,12 @@ onMounted(() => {
   top: 0;
   left: 0;
   right: 0;
+  z-index: 1000;
 
-  padding: 0 20px;
+
+  background: $background-color;
+
+  padding: 0 50px;
 }
 
 .buttons-header {
@@ -158,14 +141,11 @@ onMounted(() => {
   padding: 10px 20px;
   background: rgba(gray, 0.2);
   border-radius: 32px;
-  &.publics{
+  &.admin{
     font-weight: 500;
     width: fit-content;
     padding-left: 25px;
     padding-right: 25px;
-  }
-  &.new-record {
-    width: fit-content;
   }
   &.search-record {
     width: 300px;
@@ -175,6 +155,10 @@ onMounted(() => {
 
     & > img {
       opacity: 0.4;
+    }
+
+    &.active {
+      opacity: 1;
     }
   }
   & > img {

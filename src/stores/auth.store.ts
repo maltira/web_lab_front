@@ -64,6 +64,8 @@ export const useAuthStore = defineStore('auth', {
         this.isAuthenticated = false
         this.token = null
         userStore.user = null
+        userStore.searchQuery = null
+        userStore.filterQuery = null
 
         // Успешный выход
         return true

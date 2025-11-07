@@ -23,7 +23,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Spinner v-if="!isAppReady" />
+  <Spinner v-if="!isAppReady" :style="{height:'100vh'}" />
 
   <template v-else>
     <AppHeader v-if="!hideHeader"/>
@@ -36,5 +36,7 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-
+.main-content{
+  background: $background-color;
+}
 </style>

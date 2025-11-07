@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { PublicationEntity, PublicationRequest } from '@/types/publication.entity.ts'
+import type { PublicationEntity, PublicationRequest, PublicationUpdateRequest } from '@/types/publication.entity.ts'
 import type { ErrorResponse, MessageResponse } from '@/types/error.entity.ts'
 import { publicationService } from '@/api/publication.service.ts'
 import { isErrorResponse } from '@/utils/response_type.ts'
@@ -10,9 +10,28 @@ export const usePublicationStore = defineStore('publication', {
     publications: [] as PublicationEntity[],
     isLoading: false,
     error: null as string | null,
+    searchPublicationQuery: null as string | null,
   }),
 
+  getters: {
+    allPublications: (state) => {
+      if (!state.searchPublicationQuery){
+        return [...state.publications].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      }
+
+      const query = state.searchPublicationQuery.toLowerCase()
+      return state.publications.filter(pub =>
+        pub.title.toLowerCase().includes(query) ||
+        pub.description.toLowerCase().includes(query)
+      )
+    }
+  },
+
   actions: {
+    setSearchQuery(query: string) {
+      this.searchPublicationQuery = query
+    },
+
     async fetchPublication(id: string): Promise<PublicationEntity | null> {
       try {
         this.isLoading = true
@@ -72,6 +91,8 @@ export const usePublicationStore = defineStore('publication', {
           return null
         }
 
+        await this.fetchAllPublications()
+
         return true
       }
       catch {
@@ -95,6 +116,8 @@ export const usePublicationStore = defineStore('publication', {
           return null
         }
 
+        await this.fetchAllPublications()
+
         return true
       }
       catch {
@@ -105,5 +128,30 @@ export const usePublicationStore = defineStore('publication', {
         this.isLoading = false
       }
     },
+
+    async updatePublication(req: PublicationUpdateRequest): Promise<boolean | null> {
+      try {
+        this.isLoading = true
+        this.error = null
+
+        const response: MessageResponse | ErrorResponse = await publicationService.updatePublication(req)
+
+        if (isErrorResponse(response)){
+          this.error = response.error
+          return null
+        }
+
+        await this.fetchAllPublications()
+
+        return true
+      }
+      catch {
+        this.error = 'Ошибка изменения публикации, повторите попытку'
+        return null
+      }
+      finally {
+        this.isLoading = false
+      }
+    }
   }
 })

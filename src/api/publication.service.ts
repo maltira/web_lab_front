@@ -1,5 +1,5 @@
 import config from '@/config'
-import type { PublicationEntity, PublicationRequest } from '@/types/publication.entity.ts'
+import type { PublicationEntity, PublicationRequest, PublicationUpdateRequest } from '@/types/publication.entity.ts'
 import type { ErrorResponse, MessageResponse } from '@/types/error.entity.ts'
 
 class PublicationService {
@@ -34,6 +34,15 @@ class PublicationService {
     const response = await fetch(`${this.baseURL}/publication/${id}`, {
       method: 'DELETE',
       credentials: "include"
+    })
+    return response.json()
+  }
+
+  async updatePublication(req: PublicationUpdateRequest): Promise<MessageResponse | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/publication/update`, {
+      method: 'PUT',
+      credentials: "include",
+      body: JSON.stringify(req)
     })
     return response.json()
   }

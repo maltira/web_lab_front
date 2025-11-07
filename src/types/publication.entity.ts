@@ -5,6 +5,7 @@ export interface PublicationEntity{
   title: string;
   description: string;
   user_id: string;
+  categories: string;
 
   created_at: Date;
   updated_at: Date;
@@ -16,4 +17,11 @@ export interface PublicationRequest {
   title: string;
   description: string;
   user_id: string;
+  categories: string;
+}
+export interface PublicationUpdateRequest {
+  id: string;
+  title: string;
+  description: string;
+  categories: string;
 }

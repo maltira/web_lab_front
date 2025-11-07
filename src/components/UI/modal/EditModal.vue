@@ -88,8 +88,8 @@ watch(
 <template>
   <div class="modal-container" :class="{ active: isOpen, 'dark-theme': theme === 'dark' }" @click="handleClose">
     <div class="modal-content" @click.stop>
-      <div class="modal-close-button">
-        <img src="/icons/close.svg" @click="handleClose" alt="close" width="28px" />
+      <div class="modal-close-button" @click="handleClose">
+        <img src="/icons/close.svg" alt="close" width="28px" />
       </div>
       <div class="modal-header">
         <h1>Обновить данные</h1>

@@ -1,380 +1,154 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user.store'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { usePublicationStore } from '@/stores/publication.store.ts'
 import { storeToRefs } from 'pinia'
-import { useNotification } from '@/composables/useNotification'
 import { formatDate } from '@/utils/date_format.ts'
-import Spinner from '@/components/UI/Spinner.vue'
-import type { UpdatedUser, UserEntity } from '@/types/user.entity.ts'
-import DeleteModal from '@/components/UI/modal/DeleteModal.vue'
-import EditModal from '@/components/UI/modal/EditModal.vue'
+import type { PublicationEntity, PublicationRequest } from '@/types/publication.entity.ts'
+import PublicationModal from '@/components/UI/modal/PublicationModal.vue'
+import { useNotification } from '@/composables/useNotification.ts'
 import { useThemeStore } from '@/stores/theme.store.ts'
+import { useUserStore } from '@/stores/user.store.ts'
+import NewPostModal from '@/components/UI/modal/NewPostModal.vue'
+import { parseCategories } from '@/utils/validate_categories.ts'
 
 const themeStore = useThemeStore()
 const { theme } = storeToRefs(themeStore)
 
+const {success, err} = useNotification()
+
 const userStore = useUserStore()
-const { user, users, isLoading, error, filteredUsers, searchQuery, filterQuery } = storeToRefs(userStore)
-const { fetchAllUsers, updateUser, deleteUser, setSearchQuery, setFilterQuery } = userStore
-const { success, err } = useNotification()
+const publicationStore = usePublicationStore()
 
-const openStatusSelect = ref<number | null>(null)
+const { user } = storeToRefs(userStore)
+const { error, searchPublicationQuery, allPublications, isLoading } = storeToRefs(publicationStore)
+const { fetchAllPublications, createPublication, deletePublication, setSearchQuery  } = publicationStore
 
-const isEditModalOpen = ref(false)
-const isDeleteModalOpen = ref(false)
-const userDeleting = ref<UserEntity | null>(null)
-const userEditing = ref<UserEntity | null>(null)
+const isPublicationModalOpen = ref(false)
+const publicationOpen = ref<PublicationEntity | null>(null)
+const isNewPostModalOpen = ref(false)
 
-const toggleDeleteModal = (user: UserEntity) => {
-  isDeleteModalOpen.value = !isDeleteModalOpen.value
+const togglePublicationModal = (id: number) => {
+  isPublicationModalOpen.value = !isPublicationModalOpen.value
 
-  if (isDeleteModalOpen.value) {
-    userDeleting.value = user
+  if (isPublicationModalOpen.value && allPublications.value[id]) {
+    publicationOpen.value = allPublications.value[id]
   } else {
-    userDeleting.value = null
+    publicationOpen.value = null
   }
 }
-
-const toggleEditModal = (user: UserEntity) => {
-  isEditModalOpen.value = !isEditModalOpen.value
-
-  if (isEditModalOpen.value) {
-    userEditing.value = user
-  } else {
-    userEditing.value = null
-  }
+const toggleNewPostModal = () => {
+  isNewPostModalOpen.value = !isNewPostModalOpen.value
 }
 
-const changeStatusSelect = (index: number) => {
-  if (openStatusSelect.value === index) {
-    openStatusSelect.value = null
-  } else {
-    openStatusSelect.value = index
-  }
-}
-
-const changeUserStatus = async (userID: string, is_block: boolean) => {
-  const newUser: UpdatedUser = {
-    id: userID,
-    is_block: is_block,
-  }
-  await updateUser(newUser)
-
+const DeletePublication = async (id: string) => {
+  await deletePublication(id)
   if (error.value) {
-    err('Ошибка обновления пользователя', error.value.toString())
-  }
-  else if (!users.value) {
-    err('Ошибка обновления пользователя', "Список пользователей пуст")
+    err("Ошибка удаления", error.value)
   }
   else {
-    const usrIdx = users.value.findIndex((e) => e.id === userID)
-    if (usrIdx !== -1) {
-      users.value[usrIdx]!.is_block = is_block
-    }
-    openStatusSelect.value = null
-    success('Пользователь обновлен', `Вы изменили данные у пользователя с ID: ${userID}`)
+    success("Публикация удалена", `Вы успешно удалили публикацию с ID: ${id}`)
+    isPublicationModalOpen.value = false
   }
 }
-
-const changeUser = async (req: UpdatedUser) => {
-  console.log(req)
-  await updateUser(req)
-  if (error.value) {
-    err('Ошибка обновления пользователя', error.value.toString())
-  }
-  else if (!users.value) {
-    err('Ошибка обновления пользователя', "Список пользователей пуст")
-  }
-  else {
-    success('Пользователь обновлен', `Вы изменили данные у пользователя с ID: ${req.id}`)
-    await fetchAllUsers()
-  }
-}
-
-const deleteUserByID = async (id: string) => {
-  await deleteUser(id)
+const CreatePublication = async (req: PublicationRequest) => {
+  await createPublication(req)
 
   if (error.value) {
-    err('Ошибка удаления пользователя', error.value.toString())
-  }
-  else if (!users.value) {
-    err('Ошибка удаления пользователя', "Список пользователей пуст")
+    err("Ошибка создания", error.value)
   }
   else {
-    users.value = users.value.filter((e) => e.id !== id)
-    isDeleteModalOpen.value = false
-    success('Пользователь удалён', `Вы удалили пользователя с ID: ${id}`)
+    success("Публикация создана", `Вы успешно создали пуликацию «${req.title}»`)
+    isNewPostModalOpen.value = false
   }
-}
-
-// Закрытие при клике вне компонента
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.td-status')) {
-    openStatusSelect.value = null
-  }
-}
-
-const handleFilter = (type: string | null) => {
-  if (filterQuery.value === type) {
-    setFilterQuery(null)
-    return
-  }
-  setFilterQuery(type)
 }
 
 onMounted(async () => {
-  document.addEventListener('click', handleClickOutside)
-  await fetchAllUsers()
-  if (error.value) {
-    err('Ошибка получения пользователей', error.value.toString())
-  }
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+  await fetchAllPublications()
 })
 </script>
 
 <template>
-  <div class="home_page">
-    <Spinner v-if="isLoading" />
-    <div class="search-result-header" v-if="searchQuery">
-      <p @click="setSearchQuery('')">← Вернуться назад</p>
-      <h1>Записи по запросу «{{searchQuery}}»</h1>
+  <div class="publications_page">
+    <div class="page-header">
+      <div class="search-result-header">
+        <p v-if="searchPublicationQuery" @click="searchPublicationQuery ? setSearchQuery('') : null">← Все публикации</p>
+        <h1>{{ searchPublicationQuery ? `Публикации по запросу «${searchPublicationQuery}»` : "Все публикации"}}</h1>
+      </div>
+      <button v-if="user && user.Group.name === 'Админ' || user && user.Group.can_publish_posts" @click="toggleNewPostModal" class="button new-post">
+        <img :src=" theme === 'dark' ? '/icons/add-white.svg' : '/icons/add.svg'" alt="add">
+        Новая публикация
+      </button>
     </div>
-    <table v-if="!error && !isLoading && filteredUsers && filteredUsers.length > 0">
-      <thead>
-        <tr class="main-row">
-          <td>
-            <button @click="handleFilter('id')" :class="{'active-filter': filterQuery === 'id'}">
-              ID
-              <img src="/icons/arrow.svg" alt="arrow" width="16px" />
-            </button>
-          </td>
-          <td>
-            <button @click="handleFilter('name')" :class="{'active-filter': filterQuery === 'name'}">
-              Имя
-              <img src="/icons/arrow.svg" alt="arrow" width="16px" />
-            </button>
-          </td>
-          <td>
-            <button @click="handleFilter('email')" :class="{'active-filter': filterQuery === 'email'}">
-              Email
-              <img src="/icons/arrow.svg" alt="arrow" width="16px" />
-            </button>
-          </td>
-          <td>
-            <button @click="handleFilter('group')" :class="{'active-filter': filterQuery === 'group'}">
-              Группа
-              <img src="/icons/arrow.svg" alt="arrow" width="16px" />
-            </button>
-          </td>
-          <td>
-            <button @click="handleFilter('status')" :class="{'active-filter': filterQuery === 'status'}">
-              Статус
-              <img src="/icons/arrow.svg" alt="arrow" width="16px" />
-            </button>
-          </td>
-          <td>
-            <button @click="handleFilter('last_visit')" :class="{'active-filter': filterQuery === 'last_visit'}">
-              Последнее посещение
-              <img src="/icons/arrow.svg" alt="arrow" width="16px" />
-            </button>
-          </td>
-          <td v-if="user && user.Group.name === 'Админ'"></td>
-          <td v-if="user && user.Group.name === 'Админ'"></td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(usr, i) in filteredUsers" :key="i">
-          <td>{{ usr.id }}</td>
-          <td>{{ usr.name }}</td>
-          <td>{{ usr.email }}</td>
-          <td>{{ usr.Group.name }}</td>
-          <td class="td-status">
-            <button
-              :class="{
-                disabled: user && user.Group.name !== 'Админ',
-                block: usr.is_block,
-                'active-status': openStatusSelect === i,
-                'dark-theme': theme === 'dark'
-              }"
-              @click="changeStatusSelect(i)"
+    <div class="list-publication" v-if="!isLoading && allPublications.length > 0">
+      <div
+        v-for="(p, i) in allPublications"
+        :key="i"
+        class="publication-item"
+        @click="togglePublicationModal(i)"
+      >
+        <div class="p-header">
+          <h2>{{p.title}}</h2>
+          <p>{{p.description}}</p>
+          <div class="p-categories" v-if="parseCategories(p.categories).length > 0">
+            <div class="category-item"
+                 v-for="(c, i) in parseCategories(p.categories).slice(0, 5)"
+                 :key="i"
             >
-              {{ usr.is_block ? 'Заблокирован' : 'Доступен' }}
-              <img
-                src="/icons/arrow.svg"
-                :class="{ disabled: user && user.Group.name !== 'Админ' }"
-                alt="arrow"
-                width="16px"
-              />
-            </button>
-            <div class="block-status" v-if="openStatusSelect === i" @click.stop>
-              <p
-                :class="{ selected: usr.is_block }"
-                @click="usr.is_block ? null : changeUserStatus(usr.id, true)"
-              >
-                Заблокирован
-              </p>
-              <p
-                :class="{ selected: !usr.is_block }"
-                @click="usr.is_block ? changeUserStatus(usr.id, false) : null"
-              >
-                Доступен
-              </p>
+              <p>{{c}}</p>
             </div>
-          </td>
-          <td>{{ formatDate(usr.last_visit_at, 'DD/MM/YYYY HH:mm') }}</td>
-          <td v-if="user && user.Group.name === 'Админ'" class="action"><img @click="toggleEditModal(usr)" :src="theme === 'dark' ? '/icons/edit-white.svg' : '/icons/edit.svg'" alt="edit"></td>
-          <td v-if="user && user.Group.name === 'Админ'" class="action" ><img @click="toggleDeleteModal(usr)" :src="theme === 'dark' ? '/icons/delete-white.svg' : '/icons/delete.svg'" alt="del"></td>
-        </tr>
-      </tbody>
-    </table>
-    <p v-else class="search-result-none">Ничего не найдено</p>
+          </div>
+        </div>
+        <div class="p-footer">
+          <div class="user-info">
+            <img width="16px" :src="theme === 'dark' ? '/icons/user-white.svg' : '/icons/user.svg'" alt="">
+            <p>{{p.User.name || 'Unknown'}}</p>
+          </div>
+          <p>{{formatDate(p.created_at, 'DD/MM/YYYY HH:mm')}}</p>
+        </div>
+      </div>
+    </div>
+    <p v-if="!isLoading && allPublications.length === 0" class="search-result-none">Ничего не найдено</p>
   </div>
 
-  <DeleteModal :is-open="isDeleteModalOpen" :user="userDeleting" :on-user-delete="deleteUserByID" @close="isDeleteModalOpen = false"/>
-  <EditModal :is-open="isEditModalOpen" :user="userEditing" :update-user="changeUser" @close="isEditModalOpen = false"/>
+  <NewPostModal :is-open="isNewPostModalOpen" :create-post="CreatePublication" @close="isNewPostModalOpen = false"/>
+  <PublicationModal :is-open="isPublicationModalOpen" :on-delete="DeletePublication" :publication="publicationOpen" @close="isPublicationModalOpen = false"/>
 </template>
 
 <style scoped lang="scss">
-.home_page {
+.publications_page {
   margin-top: 80px;
-  padding: 50px 20px;
-}
-table {
-  width: 100%;
-  & > thead > tr, & > tbody > tr {
-    &.main-row {
-      & > td {
-        font-weight: 500;
-        padding: 10px;
-      }
-    }
-    & > td {
-      font-size: 16px;
-      padding: 10px;
-
-      &.td-status {
-        position: relative;
-        width: 1%;
-        white-space: nowrap;
-
-        & > button {
-          display: flex;
-          width: 250px;
-          justify-content: space-between;
-          align-items: center;
-          border-radius: 32px;
-          padding: 5px 20px;
-          background: #e6fbe7;
-          font-weight: 500;
-          color: #5e9a10;
-          opacity: 0.7;
-          position: relative;
-          z-index: 2;
-
-          &.dark-theme {
-            opacity: 0.9;
-
-
-          }
-          &.block {
-            background: #ffe4db;
-            color: #ff4201;
-          }
-          & > img {
-            opacity: 0.7;
-            transform: translateY(2px);
-
-            &.disabled {
-              display: none;
-            }
-          }
-          &:hover {
-            opacity: 0.8;
-          }
-          &.active-status {
-            opacity: 0.8;
-            z-index: 4;
-          }
-          &.disabled {
-            pointer-events: none;
-            justify-content: start;
-          }
-        }
-
-        & > .block-status {
-          padding: 10px 0;
-          display: flex;
-          flex-direction: column;
-          position: absolute;
-          background: #f5f5f5;
-          top: 50px;
-          width: 250px;
-          border-radius: 12px;
-          z-index: 3;
-
-          & > p {
-            font-size: 16px;
-            width: 100%;
-            padding: 15px 20px;
-            opacity: 0.8;
-            cursor: pointer;
-            color: $black-primary;
-
-            &.selected {
-              opacity: 0.3;
-              pointer-events: none;
-            }
-            &:hover {
-              opacity: 1;
-              background: rgba(gray, 0.1);
-            }
-          }
-        }
-      }
-    }
-  }
-  & > thead > tr > td > button {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    & > img {
-      transform: translateY(2px);
-      opacity: 0.2;
-    }
-
-    &:hover {
-      & > img {
-        opacity: 1;
-      }
-    }
-    &.active-filter{
-      & > img {
-        opacity: 1;
-      }
-    }
-  }
-}
-table, th, td {
-  border: 1px solid rgba(gray, 0.1);
+  padding: 50px 50px;
+  display: flex;
+  flex-direction: column;
 }
 
-.action {
-  text-align: center;
+.page-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.button {
+  height: 40px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0.7;
+  cursor: pointer;
+
+  width: fit-content;
+  padding: 10px 20px;
+  background: rgba(gray, 0.2);
+  border-radius: 32px;
 
   & > img {
-    cursor: pointer;
-    width: 20px;
-    opacity: 0.7;
+    width: 16px;
+    transform: translateY(1px);
+  }
 
-    &:hover{
-      opacity: 0.9;
-    }
+  &:hover{
+    opacity: 0.9;
   }
 }
 
@@ -384,7 +158,7 @@ table, th, td {
   flex-direction: column;
   margin-bottom: 35px;
   & > h1 {
-    font-size: 28px;
+    font-size: 36px;
   }
   & > p {
     font-size: 16px;
@@ -403,5 +177,115 @@ table, th, td {
   align-items: center;
   opacity: 0.7;
   padding: 10px;
+}
+
+.list-publication {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.publication-item{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 30px;
+  background: $background-color;
+  border: 1px solid rgba(gray, 0.2);
+  background: rgba(gray, 0.05);
+  width: calc( 100% / 4 - 15px + 15px / 4); // ширина конейнера - отступ + поправка по правому отступу
+  border-radius: 12px;
+  cursor: pointer;
+
+  &:hover {
+    border: 1px solid rgba(gray, 0.8);
+    background: rgba(gray, 0.08);
+    transform: scale(1.02);
+    box-shadow: 0 0 32px 0 rgba(white, 0.02);
+
+    .category-item {
+      background: rgba(gray, 0.4);
+      & > p {
+        opacity: 0.9;
+      }
+    }
+  }
+}
+.p-header{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  & > h2 {
+    font-size: 28px;
+  }
+
+  & > p {
+    opacity: 0.7;
+    font-size: 16px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 8; /* number of lines to show */
+    line-clamp: 8;
+    -webkit-box-orient: vertical;
+  }
+}
+.p-categories {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+
+  & > .category-item {
+    padding: 5px 15px;
+    border-radius: 8px;
+    background: rgba(gray, 0.3);
+    & > p {
+      font-size: 16px;
+      opacity: 0.7;
+    }
+  }
+}
+.p-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+
+  & > p {
+    opacity: 0.7;
+    font-size: 16px;
+
+    width: fit-content;
+    white-space: nowrap;
+    background: rgba(gray, 0.2);
+    padding: 8px 15px;
+    border-radius: 16px;
+  }
+
+  & > .user-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: rgba(gray, 0.2);
+    padding: 8px 15px;
+    border-radius: 16px;
+    opacity: 0.7;
+
+    max-width: 50%;
+
+    & > p {
+      font-size: 16px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+
+    }
+    & > img {
+      opacity: 0.7;
+    }
+
+    &:hover{
+      opacity: 0.9;
+    }
+  }
 }
 </style>

@@ -1,23 +1,56 @@
 <script setup lang="ts">
 import { useThemeStore } from '@/stores/theme.store.ts'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 
 const themeStore = useThemeStore()
 const { theme } = storeToRefs(themeStore)
 
 interface Props {
   size?: 'small' | 'medium'
+  color?: 'dark' | 'white'
 }
-withDefaults(defineProps<Props>(), {
-  size: 'medium'
+const props = withDefaults(defineProps<Props>(), {
+  size: 'medium',
+  color: 'dark'
+})
+
+const computeBorder = computed(() => {
+  if (props.size === 'small') {
+    if (props.color === 'white') {
+      return '3px solid rgba(white, 0.1)'
+    }
+    else if (props.color === 'dark') {
+      return '3px solid rgba(black, 0.1)'
+    }
+
+    if (theme.value === 'dark')
+      return '3px solid rgba(black, 0.1)'
+    else return '3px solid rgba(white, 0.1)'
+  }
+})
+
+const computeBorderTop = computed(() => {
+  if (props.size === 'small') {
+    if (props.color === 'white') {
+      return '3px solid white'
+    }
+    if (props.color === 'dark') {
+      return '3px solid black'
+    }
+
+    if (theme.value === 'dark')
+      return '3px solid black'
+    else return '3px solid white'
+  }
 })
 </script>
 
 <template>
   <div class="loading-screen" :class="size">
     <div class="spinner" :style="{
-      border: size === 'small' && theme === 'dark' ? '3px solid rgba(black, 0.1)' : '3px solid rgba(white, 0.1)',
-      borderTop: size === 'small' && theme === 'dark' ? '3px solid black' : '3px solid white'
+      border: computeBorder,
+      borderTop: computeBorderTop,
     }"></div>
   </div>
 </template>
@@ -30,7 +63,7 @@ withDefaults(defineProps<Props>(), {
 
   &.medium {
     width: 100%;
-    height: 100vh;
+    height: 300px;
     & > .spinner {
       width: 35px;
       height: 35px;

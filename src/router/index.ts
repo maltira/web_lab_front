@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
-import PublicationView from '@/views/PublicationsView.vue'
+import AdminView from '@/views/AdminView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -14,12 +14,13 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/publications',
-    name: 'Publications',
-    component: PublicationView,
+    path: '/admin',
+    name: 'Admin-panel',
+    component: AdminView,
     meta: {
       hideHeader: false,
-    }
+    },
+    beforeEnter
   },
   {
     path: '/auth',

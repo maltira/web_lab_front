@@ -2,5 +2,6 @@
 export interface GroupEntity {
   id: string;
   name: string;
-  isAvailable: boolean;
+  is_available: boolean;
+  can_publish_posts: boolean;
 }
