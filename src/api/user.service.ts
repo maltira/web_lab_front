@@ -1,6 +1,7 @@
 import config from '@/config'
 import type {CreateUserRequest, UpdatedUser, UserEntity} from '@/types/user.entity.ts'
 import type {ErrorResponse, MessageResponse} from '@/types/error.entity.ts'
+import type { GroupEntity } from '@/types/group.entity.ts'
 
 class UserService {
   private baseURL: string = config.apiUrl
@@ -60,6 +61,14 @@ class UserService {
       method: 'POST',
       credentials: "include",
       body: JSON.stringify(req),
+    })
+    return response.json()
+  }
+
+  async fetchGroups(): Promise<GroupEntity[] | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/group/all`, {
+      method: 'GET',
+      credentials: "include",
     })
     return response.json()
   }

@@ -9,10 +9,11 @@ import type { CreateUserRequest, UpdatedUser, UserEntity } from '@/types/user.en
 import DeleteModal from '@/components/UI/modal/DeleteModal.vue'
 import EditModal from '@/components/UI/modal/EditModal.vue'
 import { useThemeStore } from '@/stores/theme.store.ts'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import NewRecordModal from '@/components/UI/modal/NewRecordModal.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const themeStore = useThemeStore()
 const { theme } = storeToRefs(themeStore)
@@ -85,7 +86,6 @@ const changeUserStatus = async (userID: string, is_block: boolean) => {
 }
 
 const changeUser = async (req: UpdatedUser) => {
-  console.log(req)
   await updateUser(req)
   if (error.value) {
     err('Ошибка обновления пользователя', error.value.toString())

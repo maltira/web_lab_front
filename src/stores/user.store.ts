@@ -4,12 +4,13 @@ import type {ErrorResponse, MessageResponse} from '@/types/error.entity.ts'
 import { userService } from '@/api/user.service.ts'
 import { isErrorResponse } from '@/utils/response_type.ts'
 import { filterUsersArray } from '@/utils/filterUsersArray.ts'
-
+import type { GroupEntity } from '@/types/group.entity.ts'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
     user: null as UserEntity | null,
     users: [] as UserEntity[],
+    groups: [] as GroupEntity[],
     isLoading: false,
     error: null as string | null,
     searchQuery: null as string | null,
@@ -37,6 +38,11 @@ export const useUserStore = defineStore('user', {
           user.email.toLowerCase().includes(query) ||
           user.Group.name.toLowerCase().includes(query)
         )
+    },
+    filteredGroups: (state) => {
+      return [...state.groups]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .filter((group) => group.is_available)
     }
   },
   actions: {
@@ -209,6 +215,31 @@ export const useUserStore = defineStore('user', {
       }
       catch {
         this.error = 'Ошибка создания пользователя, повторите попытку'
+        return null
+      }
+      finally {
+        this.isLoading = false
+      }
+    },
+
+    async fetchGroups(): Promise<GroupEntity[] | null> {
+      try {
+        this.isLoading = true
+        this.error = null
+
+        const response: GroupEntity[] | ErrorResponse = await userService.fetchGroups()
+
+        if (isErrorResponse(response)){
+          this.error = response.error
+          return null
+        }
+
+        this.groups = response
+
+        return response
+      }
+      catch {
+        this.error = "Ошибка получения групп, повторите попытку"
         return null
       }
       finally {

@@ -5,6 +5,7 @@ import Spinner from '@/components/UI/Spinner.vue'
 import { useUserStore } from '@/stores/user.store.ts'
 import { storeToRefs } from 'pinia'
 import { useThemeStore } from '@/stores/theme.store.ts'
+import SelectRoleModal from '@/components/UI/modal/SelectRoleModal.vue'
 
 const themeStore = useThemeStore()
 const { theme } = storeToRefs(themeStore)
@@ -22,8 +23,15 @@ const props = defineProps<Props>()
 const name = ref('')
 const email = ref('')
 const password = ref('')
-const group = ref('')
+const groupID = ref('')
+const groupName = ref('')
+
 const isPasswordVisible = ref(false)
+const isRoleModalOpen = ref(false)
+
+const toggleRoleModal = () => {
+  isRoleModalOpen.value = !isRoleModalOpen.value
+}
 
 // обращение к родителю
 const emit = defineEmits<{ close: [] }>()
@@ -31,7 +39,8 @@ const handleClose = () => {
   email.value = ''
   name.value = ''
   password.value = ''
-  group.value = ''
+  groupID.value = ''
+  groupName.value = ''
   emit('close')
 }
 
@@ -41,7 +50,7 @@ const isUpdateAvailable = computed(() => {
       (name.value != '' && name.value != props.user.name) ||
       (email.value != '' && email.value != props.user.email) ||
       password.value != '' ||
-      (group.value != '' && group.value != props.user.group_id)
+      (groupID.value != '' && groupID.value != props.user.group_id)
     )
   } else return false
 })
@@ -63,8 +72,8 @@ const UpdateUser = async () => {
       req.name = name.value
     if (password.value != "")
       req.password = password.value
-    if (group.value != "" && props.user && props.user.group_id)
-      req.group_id = group.value
+    if (groupID.value != "" && props.user && props.user.group_id)
+      req.group_id = groupID.value
 
     if (req.email || req.name || req.password || req.group_id)
       await props.updateUser(req)
@@ -72,12 +81,20 @@ const UpdateUser = async () => {
   }
 }
 
+const handleRoleUpdate = (id: string, name: string) => {
+  groupID.value = id
+  groupName.value = name
+  isRoleModalOpen.value = false
+}
 // слежка за isOpen
-watch(
-  () => props.isOpen,
+watch(() => props.isOpen,
   (newValue) => {
     if (newValue) {
       document.addEventListener('keydown', handleKeydown)
+      email.value = props.user?.email || ""
+      name.value = props.user?.name || ""
+      groupName.value = props.user?.Group.name || ""
+      groupID.value = props.user?.group_id || ""
     } else {
       document.removeEventListener('keydown', handleKeydown)
     }
@@ -121,12 +138,10 @@ watch(
             @click="isPasswordVisible = !isPasswordVisible"
           />
         </div>
-        <input
-          v-model="group"
-          required
-          type="text"
-          :placeholder="props.user ? props.user.group_id : 'Unknown'"
-        />
+        <button class="btn-select-role" @click="toggleRoleModal">
+          <span>{{groupName ? groupName : props.user ? props.user.Group.name : 'Unknown'}}</span>
+          <img :src="theme === 'dark' ? 'icons/edit-white.svg' : 'icons/edit.svg'" alt="edit" width="16px" />
+        </button>
       </div>
       <div class="modal-actions">
         <button
@@ -135,10 +150,10 @@ watch(
           @click="isUpdateAvailable ? UpdateUser() : null"
           :style="{
             background: theme === 'dark' ? 'var(--white-primary)' : 'var(--black-primary)',
-            color: theme === 'dark' ? 'var(--black-primary)' : 'var(--white-primary)',
+            color: theme === 'dark' ? 'var(--black-primary)' : 'var(--white-primary)'
           }"
         >
-          {{ !isLoading ? 'Обновить' : '' }}
+          {{ !isLoading ? 'Сохранить' : '' }}
           <Spinner size="small" v-if="isLoading" />
         </button>
         <button
@@ -146,7 +161,7 @@ watch(
           @click="handleClose"
           :style="{
             border: theme === 'dark' ? '1px solid var(--white-primary)' : '1px solid var(--black-primary)',
-            color: theme === 'dark' ? 'var(--white-primary)' : 'var(--black-primary)',
+            color: theme === 'dark' ? 'var(--white-primary)' : 'var(--black-primary)'
           }"
         >
           Отмена
@@ -154,6 +169,8 @@ watch(
       </div>
     </div>
   </div>
+
+  <SelectRoleModal :is-open="isRoleModalOpen" :group="groupID" @close="isRoleModalOpen = false" @user-updated="handleRoleUpdate"/>
 </template>
 
 <style scoped lang="scss">
@@ -248,7 +265,7 @@ watch(
   gap: 10px;
 
   & > input,
-  & > div > input {
+  & > div > input, & > button {
     width: 100%;
     height: 48px;
     padding: 0 15px;
@@ -271,6 +288,19 @@ watch(
       }
     }
   }
+  & > .btn-select-role {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    & > span, & > img {
+      font-weight: 400;
+    }
+
+    &:hover{
+      background: rgba(gray, 0.15);
+    }
+  }
+
 }
 .modal-close-button {
   cursor: pointer;

@@ -186,6 +186,7 @@ watch(() => props.isOpen, (newValue) => {
       & > p {
         max-height: 60vh;
         opacity: 0.7;
+        white-space: pre-line
       }
     }
 

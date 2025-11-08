@@ -228,6 +228,7 @@ onMounted(async () => {
     -webkit-line-clamp: 8; /* number of lines to show */
     line-clamp: 8;
     -webkit-box-orient: vertical;
+    white-space: pre-line
   }
 }
 .p-categories {

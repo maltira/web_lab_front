@@ -117,7 +117,7 @@ watch(() => props.isOpen, (newValue) => {
             color: theme === 'dark' ? 'var(--black-primary)' : 'var(--white-primary)',
           }"
         >
-          {{!isLoading ? "Добавить" : ""}}
+          {{!isLoading ? "Сохранить" : ""}}
           <Spinner size="small" v-if="isLoading"/>
         </button>
         <button

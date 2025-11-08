@@ -16,7 +16,9 @@ export const usePublicationStore = defineStore('publication', {
   getters: {
     allPublications: (state) => {
       if (!state.searchPublicationQuery){
-        return [...state.publications].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        return [...state.publications]
+          .sort((a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       }
 
       const query = state.searchPublicationQuery.toLowerCase()
