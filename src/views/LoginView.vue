@@ -41,23 +41,23 @@ const auth = async () => {
   <div class="login-container">
     <div class="login_block">
       <div class="login_title">
-        <h1>Войдите в аккаунт</h1>
-        <p>Получите данные у админа</p>
+        <div class="logotype">S</div>
+        <h1>Добро пожаловать в <span>Scribble</span>!</h1>
+        <div class="registration">
+          <p>Вы впервые здесь?</p>
+          <RouterLink to="/">Присоединиться</RouterLink>
+        </div>
       </div>
       <div class="login_inputs">
-        <div class="input_item">
-          <input id="email-input" name="email" v-model="email" autocomplete="off" required type="email" placeholder="example@gmail.com"/>
-        </div>
-        <div class="input_item">
-          <div class="password-input">
-            <input id="password-input" name="password" v-model="password" autocomplete="off" required :type="isPasswordVisible ? 'text' : 'password'" placeholder="Введите пароль"/>
-            <img :src="isPasswordVisible ? '/icons/eye-closed.svg' : '/icons/eye.svg'" alt="visible" @click="isPasswordVisible = !isPasswordVisible">
-          </div>
+        <input id="email-input" name="email" v-model="email" autocomplete="off" required type="email" placeholder="Введите email"/>
+        <div class="password-input">
+          <input id="password-input" name="password" v-model="password" autocomplete="off" required :type="isPasswordVisible ? 'text' : 'password'" placeholder="Введите пароль"/>
+          <img :src="isPasswordVisible ? '/icons/eye-closed.svg' : '/icons/eye.svg'" alt="visible" @click="isPasswordVisible = !isPasswordVisible">
         </div>
       </div>
       <button class="login_submit" @click="auth" :class="{'disabled': !email || !password || isLoading}">
         {{isLoading ? "" : "Войти"}}
-        <Spinner color="white" size="small" v-if="isLoading"/>
+        <Spinner size="small" v-if="isLoading"/>
       </button>
     </div>
   </div>
@@ -70,50 +70,96 @@ const auth = async () => {
   height: 100vh;
   justify-content: center;
   align-items: center;
+
+  background-image: url("/img/Background.png");
 }
 
 .login_block {
   display: flex;
   flex-direction: column;
-  gap: 50px;
+  gap: 60px;
   width: 500px;
   padding: 25px;
 
   & > .login_title{
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 18px;
+    align-items: center;
 
     & > h1 {
       font-size: 32px;
+      text-align: center;
+      font-weight: 400;
+      color: $white-primary;
+
+      margin-top: 40px;
+
+      & > span {
+        font-weight: 700;
+      }
     }
-    & > p {
-      opacity: 0.7;
+    & > .registration {
+      display: flex;
+      gap: 5px;
+      font-size: 16px;
+      justify-content: center;
+      & > p {
+        text-align: center;
+        opacity: 0.4;
+        color: $white-primary;
+      }
+      & > a {
+        opacity: 0.9;
+        color: $white-primary;
+
+        &:hover{
+          opacity: 1;
+        }
+      }
+    }
+    & > .logotype {
+      width: 70px;
+      height: 70px;
+      background: rgba(gray, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 20px;
+      font-size: 36px;
+      font-weight: 700;
+
+      animation: scale-size 5s infinite linear alternate;
     }
   }
 }
-
+@keyframes scale-size {
+  from {
+    box-shadow: 0 0 16px 0 rgba(gray, 0.2);
+  }
+  to {
+    box-shadow: 0 0 16px 0 $black-primary;
+  }
+}
 .login_inputs {
   display: flex;
   flex-direction: column;
   gap: 25px;
-  & > .input_item{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
 
-    & > input, .password-input > input {
-      height: 48px;
-      border-radius: 12px;
-      width: 100%;
-      padding: 0 16px;
-      background: $white-primary;
-      border: 1px solid rgba(gray, 0.2);
-      color: $black-primary;
+  & > input, .password-input > input {
+    height: 48px;
+    border-radius: 20px;
+    width: 100%;
+    padding: 0 16px;
+    background: $black-primary;
+    border: 1px solid rgba(gray, 0.15);
+    color: $white-primary;
+    &:focus{
+      box-shadow: 0 0 8px 0 rgba(255, 255, 255, 0.05);
+    }
 
-      &:focus{
-        box-shadow: 0 0 8px 0 rgba(0, 95, 248, 0.2);
-      }
+    &:-webkit-autofill{
+      transition: all 5000s ease-in-out;
     }
   }
 }
@@ -135,16 +181,16 @@ const auth = async () => {
 }
 .login_submit {
   height: 48px;
-  background: $blue-primary;
+  background: $white-primary;
   font-weight: 500;
-  border-radius: 12px;
-  color: $white-primary;
+  border-radius: 20px;
+  color: $black-primary;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 15px;
   &:hover {
-    background: rgba($blue-primary, 0.8);
+    background: rgba(#fff, 0.8);
   }
   &.disabled{
     opacity: 0.2;
