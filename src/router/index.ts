@@ -5,6 +5,7 @@ import LoginView from '@/views/LoginView.vue'
 import AdminView from '@/views/AdminView.vue'
 import { useUserStore } from '@/stores/user.store.ts'
 import NotFoundView from '@/views/NotFoundView.vue'
+import RegistrationView from '@/views/RegistrationView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -30,6 +31,14 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'Authorization',
     component: LoginView,
+    meta: {
+      hideHeader: true,
+    }
+  },
+  {
+    path: '/registration',
+    name: 'Registration',
+    component: RegistrationView,
     meta: {
       hideHeader: true,
     }

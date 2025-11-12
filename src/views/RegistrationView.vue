@@ -1,41 +1,46 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import {useAuthStore} from "@/stores/auth.store";
-import type { AuthRequest } from "@/types/auth.entity";
 import {storeToRefs} from "pinia";
 import {useNotification} from "@/composables/useNotification";
 import {useRouter} from "vue-router";
 import Spinner from '@/components/UI/Spinner.vue'
 import { useThemeStore } from '@/stores/theme.store.ts'
+import type { CreateUserRequest } from '@/types/user.entity.ts'
 
 const router = useRouter()
+const name = ref("")
 const email = ref("")
 const password = ref("")
+const confirmPassword = ref("")
 const isPasswordVisible = ref(false)
+const isConfirmPasswordVisible = ref(false)
 const authStore = useAuthStore()
 const { isLoading, error } = storeToRefs(authStore)
-const { login } = authStore
+const { registration } = authStore
 const { success, err } = useNotification()
 const themeStore = useThemeStore()
 const { theme } = storeToRefs(themeStore)
 
-const auth = async () => {
-  if (email.value && password.value) {
-    const req: AuthRequest = {
+const registrationUser = async () => {
+  if (name.value && email.value && password.value && (password.value == confirmPassword.value)) {
+    const req: CreateUserRequest = {
+      name: name.value,
       email: email.value,
-      password: password.value
+      password: password.value,
+      group_id: "700c704d-f5c9-4a95-ad9e-c040b4429050"
     }
-    await login(req)
+    await registration(req)
 
     if (error.value) {
-      err("Ошибка при авторизациии", error.value.toString())
+      err("Ошибка при регистрации", error.value.toString())
     }
     else {
       await router.push('/')
-      success("Успешная авторизация", "Добро пожаловать в Scribble")
+      success("Успешная регистрация", "Добро пожаловать в Scribble")
     }
   } else {
-    err("Неверные данные", "Введите корректные данные, возможно вы указали не все поля")
+    err("Неверные данные", "Указаны неверные данные, возможно вы указали не все поля либо пароли не совпадают")
   }
 }
 </script>
@@ -47,19 +52,24 @@ const auth = async () => {
         <div class="logotype">S</div>
         <h1>Добро пожаловать в <span>Scribble</span>!</h1>
         <div class="registration">
-          <p>Вы впервые здесь?</p>
-          <RouterLink to="/registration">Присоединиться</RouterLink>
+          <p>Уже были у нас?</p>
+          <RouterLink to="/login">Авторизация</RouterLink>
         </div>
       </div>
       <div class="login_inputs">
-        <input id="email-input" name="email" v-model="email" autocomplete="off" required type="email" placeholder="Введите email"/>
+        <input id="name-input" name="name" v-model="name" autocomplete="off" required type="text" placeholder="Как вас зовут?"/>
+        <input id="email-input" name="email" v-model="email" autocomplete="off" required type="email" placeholder="Укажите ваш email"/>
         <div class="password-input">
           <input id="password-input" name="password" v-model="password" autocomplete="off" required :type="isPasswordVisible ? 'text' : 'password'" placeholder="Введите пароль"/>
           <img :src="isPasswordVisible ? (theme == 'dark' ? '/icons/eye-closed-white.svg' : '/icons/eye-closed.svg') : (theme == 'dark' ? '/icons/eye-white.svg' : '/icons/eye.svg')"  alt="visible" @click="isPasswordVisible = !isPasswordVisible">
         </div>
+        <div class="password-input">
+          <input id="password-input-confirm" name="password" v-model="confirmPassword" autocomplete="off" required :type="isConfirmPasswordVisible ? 'text' : 'password'" placeholder="Подтвердите пароль"/>
+          <img :src="isConfirmPasswordVisible ? (theme == 'dark' ? '/icons/eye-closed-white.svg' : '/icons/eye-closed.svg') : (theme == 'dark' ? '/icons/eye-white.svg' : '/icons/eye.svg')"  alt="visible" @click="isConfirmPasswordVisible = !isConfirmPasswordVisible">
+        </div>
       </div>
-      <button class="login_submit" @click="auth" :class="{'disabled': !email || !password || isLoading}">
-        {{isLoading ? "" : "Войти"}}
+      <button class="login_submit" @click="registrationUser" :class="{'disabled': !name || !email || !password || !confirmPassword || isLoading}">
+        {{isLoading ? "" : "Создать аккаунт"}}
         <Spinner size="small" v-if="isLoading"/>
       </button>
     </div>
@@ -129,13 +139,13 @@ const auth = async () => {
   }
 }
 
-
 .login_block {
   display: flex;
   flex-direction: column;
   gap: 60px;
   width: 500px;
   padding: 25px;
+  z-index: 5;
 
   & > .login_title{
     display: flex;

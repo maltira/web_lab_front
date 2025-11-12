@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/user.store.ts'
 import type { ErrorResponse } from '@/types/error.entity.ts'
 import { authService } from '@/api/auth.service.ts'
 import { isErrorResponse } from '@/utils/response_type.ts'
-import type { UserEntity } from '@/types/user.entity.ts'
+import type { CreateUserRequest, UserEntity } from '@/types/user.entity.ts'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -49,6 +49,31 @@ export const useAuthStore = defineStore('auth', {
       }
       finally {
         this.isLoading = false // Завершаем загрузку
+      }
+    },
+
+    async registration(req: CreateUserRequest): Promise<boolean | null> {
+      const userStore = useUserStore()
+      try{
+        this.isLoading = true
+        this.error = null
+
+        const response: AuthResponse | ErrorResponse = await authService.registration(req)
+
+        if (isErrorResponse(response)) {
+          this.error = response.error
+          return null
+        }
+
+        userStore.user = response.user
+        return true
+      }
+      catch {
+        this.error = "Ошибка регистрации, повторите попытку"
+        return null
+      }
+      finally {
+        this.isLoading = false
       }
     },
 

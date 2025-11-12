@@ -1,6 +1,7 @@
 import config from '@/config'
 import type { ErrorResponse, MessageResponse } from '@/types/error.entity.ts'
 import type { AuthRequest, AuthResponse } from '@/types/auth.entity.ts'
+import type { CreateUserRequest } from '@/types/user.entity.ts'
 
 class AuthService {
   private baseURL = config.apiUrl
@@ -9,6 +10,16 @@ class AuthService {
   // ? Вход
   async login(req: AuthRequest): Promise<AuthResponse | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/auth/login`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify(req),
+    })
+    return response.json()
+  }
+
+  // ? Регистрация
+  async registration(req: CreateUserRequest): Promise<AuthResponse | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/auth/registration`, {
       method: 'POST',
       credentials: 'include',
       body: JSON.stringify(req),
