@@ -218,6 +218,8 @@ onMounted(async () => {
 
   & > h2 {
     font-size: 28px;
+    font-weight: 700;
+    opacity: 0.9;
   }
 
   & > p {

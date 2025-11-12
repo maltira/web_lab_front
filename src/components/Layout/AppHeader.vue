@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/user.store.ts'
 import { onMounted, ref } from 'vue'
 import { useThemeStore } from '@/stores/theme.store.ts'
 import { usePublicationStore } from '@/stores/publication.store.ts'
+import ProfileModal from '@/components/UI/modal/ProfileModal.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -17,11 +18,13 @@ const { logout } = authStore
 const { setSearchQuery } = publicationStore
 const { user} = storeToRefs(userStore)
 const { theme } = storeToRefs(themeStore)
+const { isAuthenticated } = storeToRefs(authStore)
 const { toggleTheme } = themeStore
 
 const isSearchOpen = ref(false)
 const search = ref("")
 const isDarkTheme = ref(false)
+const isProfileModalOpen = ref(false)
 
 const LogOut = async () => {
   await logout()
@@ -56,6 +59,19 @@ const handleTheme = (theme: 'dark' | 'light') => {
   isDarkTheme.value = theme === 'dark'
 }
 
+const handleProfile = async () => {
+  if (!isAuthenticated.value) {
+    await router.push('/login')
+  } else {
+    isProfileModalOpen.value = !isProfileModalOpen.value
+  }
+}
+const goToHome = () => {
+  router.push('/').then(() => {
+    window.scrollTo({top: 0, behavior: 'smooth'})
+  })
+}
+
 onMounted(() => {
   isDarkTheme.value = theme.value === 'dark'
 })
@@ -63,14 +79,16 @@ onMounted(() => {
 
 <template>
   <div class="header">
-    <div class="theme-selector">
-      <button class="theme-icon" @click="handleTheme('dark')" :class="{'active': isDarkTheme}">
-        🌙
-      </button>
-      <button class="theme-icon" @click="handleTheme('light')" :class="{'active': !isDarkTheme}">
-        🌞
-      </button>
-      <div :style="{
+    <div class="left-side-nav">
+      <div class="logotype" @click="goToHome">S</div>
+      <div class="theme-selector">
+        <button class="theme-icon" @click="handleTheme('dark')" :class="{'active': isDarkTheme}">
+          🌙
+        </button>
+        <button class="theme-icon" @click="handleTheme('light')" :class="{'active': !isDarkTheme}">
+          🌞
+        </button>
+        <div :style="{
         width: '31px',
         height: '31px',
         background: 'white',
@@ -78,6 +96,7 @@ onMounted(() => {
         position: 'absolute',
         transform: isDarkTheme ? 'translateX(4%)' : 'translateX(121%)',
       }"></div>
+      </div>
     </div>
     <div class="buttons-header">
       <form autocomplete="off" @submit.prevent="handleSearch" class="button search-record" :class="{active: isSearchOpen}" @click="toggleSearch">
@@ -95,12 +114,14 @@ onMounted(() => {
       <RouterLink v-if="user && user.Group.name === 'Админ'" to="/admin" class="button admin">
         Админ-панель
       </RouterLink>
-      <button class="button exit-button" @click="LogOut">
-        <img :src=" theme === 'dark' ? '/icons/exit-white.svg' : '/icons/exit.svg'" alt="exit">
-        Выйти
+      <button class="button my-profile" @click="handleProfile" :style="{width: !isAuthenticated ? '120px' : 'fit-content'}">
+        <img :src=" theme === 'dark' ? '/icons/user-white.svg' : '/icons/user.svg'" alt="user">
+        {{ isAuthenticated ?  "" : "Войти"}}
       </button>
     </div>
   </div>
+
+  <ProfileModal :is-open="isProfileModalOpen" @close="isProfileModalOpen  = false"/>
 </template>
 
 <style scoped lang="scss">
@@ -121,6 +142,51 @@ onMounted(() => {
   background: $background-color;
 
   padding: 0 50px;
+}
+
+.left-side-nav {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+
+  & > .theme-selector{
+    display: flex;
+    gap: 5px;
+    background: rgba(gray, 0.1);
+    padding: 5px 5px;
+    border-radius: 99px;
+    position: relative;
+    & > .theme-icon {
+      height: auto;
+      padding: 5px;
+      width: auto;
+      background: none;
+      z-index: 10;
+
+      &:hover{
+        background: rgba(gray, 0.05);
+      }
+
+    }
+  }
+
+  & > .logotype {
+    width: 50px;
+    height: 50px;
+    background: rgba(gray, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    font-size: 28px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    &:hover{
+      background: rgba(gray, 0.13);
+    }
+  }
 }
 
 .buttons-header {
@@ -161,33 +227,16 @@ onMounted(() => {
       opacity: 1;
     }
   }
+  &.my-profile {
+    padding: 10px 12px;
+    width: fit-content;
+  }
   & > img {
     width: 16px;
     transform: translateY(1px);
   }
   &:hover{
     opacity: 0.9;
-  }
-}
-
-.theme-selector{
-  display: flex;
-  gap: 5px;
-  background: rgba(gray, 0.1);
-  padding: 5px 5px;
-  border-radius: 99px;
-  position: relative;
-  & > .theme-icon {
-    height: auto;
-    padding: 5px;
-    width: auto;
-    background: none;
-    z-index: 10;
-
-    &:hover{
-      background: rgba(gray, 0.05);
-    }
-
   }
 }
 </style>

@@ -58,10 +58,15 @@ const auth = async () => {
           <img :src="isPasswordVisible ? (theme == 'dark' ? '/icons/eye-closed-white.svg' : '/icons/eye-closed.svg') : (theme == 'dark' ? '/icons/eye-white.svg' : '/icons/eye.svg')"  alt="visible" @click="isPasswordVisible = !isPasswordVisible">
         </div>
       </div>
-      <button class="login_submit" @click="auth" :class="{'disabled': !email || !password || isLoading}">
-        {{isLoading ? "" : "Войти"}}
-        <Spinner size="small" v-if="isLoading"/>
-      </button>
+      <div class="btns">
+        <button class="login_submit" @click="auth" :class="{'disabled': !email || !password || isLoading}">
+          {{isLoading ? "" : "Войти"}}
+          <Spinner size="small" v-if="isLoading"/>
+        </button>
+        <button class="continue" @click="router.push('/')" :class="{'disabled': isLoading}">
+          Продолжить как читатель
+        </button>
+      </div>
     </div>
 
     <div class="back-img small"></div>
@@ -235,26 +240,46 @@ const auth = async () => {
     }
   }
 }
-.login_submit {
-  height: 48px;
-  background: $white-primary;
-  font-weight: 500;
-  border-radius: 20px;
-  color: $black-primary;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  &:hover {
-    background: rgba(#fff, 0.8);
 
-    .logotype{
-      opacity: 0;
+.btns{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  & > button {
+    height: 48px;
+    font-weight: 500;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.login_submit {
+      background: $white-primary;
+      color: $black-primary;
+      gap: 15px;
+      &:hover {
+        background: rgba(#fff, 0.8);
+      }
+    }
+
+    &.continue {
+      background: #232323;
+      color: rgba(white, 0.8);
+      opacity: 0.8;
+
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    &.disabled{
+      opacity: 0.2;
+      pointer-events: none;
     }
   }
-  &.disabled{
-    opacity: 0.2;
-    pointer-events: none;
-  }
+
 }
 </style>

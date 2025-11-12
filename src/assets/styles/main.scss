@@ -1,4 +1,10 @@
 @use 'variables';
+
+@font-face {
+  font-family: 'Intro Friday';
+  src: url("public/fonts/IntroFriday.ttf");
+}
+
 body {
   font-family:
           -apple-system,

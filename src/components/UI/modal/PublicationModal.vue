@@ -181,6 +181,7 @@ watch(() => props.isOpen, (newValue) => {
 
       & > h2 {
         font-size: 28px;
+        font-weight: 700;
       }
 
       & > p {
