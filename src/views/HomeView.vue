@@ -10,6 +10,7 @@ import { useThemeStore } from '@/stores/theme.store.ts'
 import { useUserStore } from '@/stores/user.store.ts'
 import NewPostModal from '@/components/UI/modal/NewPostModal.vue'
 import { parseCategories } from '@/utils/validate_categories.ts'
+import AppFooter from '@/components/Layout/AppFooter.vue'
 
 const themeStore = useThemeStore()
 const { theme } = storeToRefs(themeStore)
@@ -108,6 +109,7 @@ onMounted(async () => {
       </div>
     </div>
     <p v-if="!isLoading && allPublications.length === 0" class="search-result-none">Ничего не найдено</p>
+    <AppFooter/>
   </div>
 
   <NewPostModal :is-open="isNewPostModalOpen" :create-post="CreatePublication" @close="isNewPostModalOpen = false"/>

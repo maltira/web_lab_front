@@ -133,7 +133,7 @@ watch(() => props.isOpen,
             placeholder="Новый пароль"
           />
           <img
-            :src="isPasswordVisible ? '/icons/eye-closed.svg' : '/icons/eye.svg'"
+            :src="isPasswordVisible ? (theme == 'dark' ? '/icons/eye-closed-white.svg' : '/icons/eye-closed.svg') : (theme == 'dark' ? '/icons/eye-white.svg' : '/icons/eye.svg')"
             alt="visible"
             @click="isPasswordVisible = !isPasswordVisible"
           />
