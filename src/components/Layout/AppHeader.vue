@@ -14,7 +14,6 @@ const userStore = useUserStore()
 const themeStore = useThemeStore()
 const publicationStore = usePublicationStore()
 
-const { logout } = authStore
 const { setSearchQuery } = publicationStore
 const { user} = storeToRefs(userStore)
 const { theme } = storeToRefs(themeStore)
@@ -25,11 +24,6 @@ const isSearchOpen = ref(false)
 const search = ref("")
 const isDarkTheme = ref(false)
 const isProfileModalOpen = ref(false)
-
-const LogOut = async () => {
-  await logout()
-  await router.push("/login")
-}
 
 const toggleSearch = () => {
   const searchInput = document.getElementById('search-input')

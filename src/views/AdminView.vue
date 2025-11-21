@@ -159,8 +159,8 @@ onUnmounted(() => {
   <div class="admin_page">
     <div class="page-header">
       <div class="search-result-header">
-        <p @click="searchQuery ? setSearchQuery('') : router.push('/')">← {{searchQuery ? 'Все записи' : 'Главное меню'}}</p>
-        <h1>{{ searchQuery ? `Записи по запросу «${searchQuery}»` : "Список всех пользователей"}}</h1>
+        <p @click="router.push('/')">← {{'Главное меню'}}</p>
+        <h1>{{"Список всех пользователей"}}</h1>
       </div>
       <button v-if="user && user.Group.name === 'Админ'" @click="toggleNewRecordModal" class="button new-record">
         <img :src=" theme === 'dark' ? '/icons/add-white.svg' : '/icons/add.svg'" alt="add">
@@ -171,49 +171,49 @@ onUnmounted(() => {
     <div v-if="!error && !isLoading && filteredUsers && filteredUsers.length > 0" class="table-container">
       <table>
         <thead>
-        <tr class="main-row">
-          <td>
-            <button @click="handleFilter('id')" :class="{'active-filter': filterQuery === 'id'}">
-              ID
-              <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
-            </button>
-          </td>
-          <td>
-            <button @click="handleFilter('name')" :class="{'active-filter': filterQuery === 'name'}">
-              Имя
-              <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
-            </button>
-          </td>
-          <td>
-            <button @click="handleFilter('email')" :class="{'active-filter': filterQuery === 'email'}">
-              Email
-              <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
-            </button>
-          </td>
-          <td>
-            <button @click="handleFilter('group')" :class="{'active-filter': filterQuery === 'group'}">
-              Группа
-              <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
-            </button>
-          </td>
-          <td>
-            <button @click="handleFilter('status')" :class="{'active-filter': filterQuery === 'status'}">
-              Статус
-              <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
-            </button>
-          </td>
-          <td>
-            <button @click="handleFilter('last_visit')" :class="{'active-filter': filterQuery === 'last_visit'}">
-              Последнее посещение
-              <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
-            </button>
-          </td>
-          <td v-if="user && user.Group.name === 'Админ'"></td>
-          <td v-if="user && user.Group.name === 'Админ'"></td>
-        </tr>
+          <tr class="main-row">
+            <td>
+              <button @click="handleFilter('id')" :class="{'active-filter': filterQuery === 'id'}">
+                ID
+                <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
+              </button>
+            </td>
+            <td>
+              <button @click="handleFilter('name')" :class="{'active-filter': filterQuery === 'name'}">
+                Имя
+                <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
+              </button>
+            </td>
+            <td>
+              <button @click="handleFilter('email')" :class="{'active-filter': filterQuery === 'email'}">
+                Email
+                <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
+              </button>
+            </td>
+            <td>
+              <button @click="handleFilter('group')" :class="{'active-filter': filterQuery === 'group'}">
+                Группа
+                <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
+              </button>
+            </td>
+            <td>
+              <button @click="handleFilter('status')" :class="{'active-filter': filterQuery === 'status'}">
+                Статус
+                <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
+              </button>
+            </td>
+            <td>
+              <button @click="handleFilter('last_visit')" :class="{'active-filter': filterQuery === 'last_visit'}">
+                Последнее посещение
+                <img :src="theme == 'dark' ? '/icons/arrow-white.svg' : '/icons/arrow.svg'" alt="arrow" width="12px" />
+              </button>
+            </td>
+            <td v-if="user && user.Group.name === 'Админ'"></td>
+            <td v-if="user && user.Group.name === 'Админ'"></td>
+          </tr>
         </thead>
         <tbody>
-        <tr v-for="(usr, i) in filteredUsers" :key="i">
+          <tr v-for="(usr, i) in filteredUsers" :key="i">
           <td>{{ usr.id }}</td>
           <td>{{ usr.name }}</td>
           <td>{{ usr.email }}</td>
