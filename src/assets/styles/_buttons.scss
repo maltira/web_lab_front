@@ -2,7 +2,6 @@
 
 @mixin big-button {
   @include button-text;
-  font-weight: 400;
 
   display: flex;
   justify-content: center;
@@ -94,13 +93,12 @@
 
 @mixin category-button {
   @include button-text;
-  font-weight: 400;
 
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  height: 32px;
+  height: 30px;
   border-radius: 6px;
   width: fit-content;
 
@@ -140,5 +138,41 @@
   &.disabled {
     pointer-events: none !important;
     opacity: 0.3 !important;
+  }
+}
+
+@mixin sidebar-tab {
+  @include button-text;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 8px 12px;
+  height: 36px;
+  border-radius: 8px;
+
+  opacity: 0.5;
+  border: 1px solid transparent;
+
+  & > img {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    opacity: 0.7;
+    border: 1px solid rgba($black-primary, 0.1);
+  }
+
+  &.active {
+    opacity: 1;
+    border: 1px solid rgba($black-primary, 0.1);
+    background-color: $gray-primary;
+  }
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.3;
   }
 }

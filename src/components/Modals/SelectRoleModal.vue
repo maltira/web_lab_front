@@ -2,13 +2,6 @@
 import { onMounted, watch } from 'vue'
 import { useUserStore } from '@/stores/user.store.ts'
 import { storeToRefs } from 'pinia'
-import { useThemeStore } from '@/stores/theme.store.ts'
-import { useNotification } from '@/composables/useNotification.ts'
-
-const { err } = useNotification()
-
-const themeStore = useThemeStore()
-const { theme } = storeToRefs(themeStore)
 
 const userStore = useUserStore()
 const { fetchGroups } = userStore
@@ -39,7 +32,7 @@ const handleRole = (id: string, name: string) => {
   if (id != props.group) {
     emit('userUpdated', id, name)
   } else {
-    err("Ошибка выбора роли", "Пользоваетль уже имеет такую роль")
+
   }
 }
 
@@ -60,7 +53,7 @@ onMounted( async() => {
 </script>
 
 <template>
-  <div class="modal-container" :class="{ active: isOpen, 'dark-theme': theme === 'dark' }" @click="handleClose">
+  <div class="modal-container" :class="{ active: isOpen }" @click="handleClose">
     <div class="modal-content" @click.stop>
       <div class="modal-close-button" @click="handleClose">
         <img src="/icons/close.svg" alt="close" width="28px" />
@@ -113,7 +106,7 @@ onMounted( async() => {
   display: flex;
   flex-direction: column;
   gap: 35px;
-  background: $background-color;
+  background: $white-primary;
   width: 500px;
   position: relative;
   padding: 40px;

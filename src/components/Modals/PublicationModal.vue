@@ -6,7 +6,7 @@ import { useThemeStore } from '@/stores/theme.store.ts'
 import type { PublicationEntity} from '@/types/publication.entity.ts'
 import { formatDate } from '@/utils/date_format.ts'
 import { parseCategories } from '@/utils/validate_categories.ts'
-import EditPostModal from '@/components/UI/modal/EditPostModal.vue'
+import EditPostModal from '@/components/Modals/EditPostModal.vue'
 
 const themeStore = useThemeStore()
 const { theme } = storeToRefs(themeStore)
@@ -147,7 +147,7 @@ watch(() => props.isOpen, (newValue) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: $background-color;
+  background: $white-primary;
   width: 700px;
   position: relative;
   padding: 50px 30px;

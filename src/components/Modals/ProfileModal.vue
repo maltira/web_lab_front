@@ -1,18 +1,13 @@
 <script setup lang="ts">
-
-import { watch } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user.store.ts'
-import { useAuthStore } from '@/stores/auth.store.ts'
-import router from '@/router'
 
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
-const authStore = useAuthStore()
-const { logout } = authStore
 
 interface Props {
-  isOpen: boolean,
+  isOpen: boolean
 }
 const props = defineProps<Props>()
 
@@ -28,44 +23,30 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 }
 
-const LogOut = async () => {
-  await logout()
-  await router.push("/login")
-  handleClose()
-}
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
 
-// слежка за isOpen
-watch(() => props.isOpen, (newValue) => {
-  if (newValue) {
-    document.addEventListener('keydown', handleKeydown)
-  } else {
-    document.removeEventListener('keydown', handleKeydown)
-  }
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
 })
 </script>
 
 <template>
-  <div class="modal-container" :class="{active: isOpen }" @click="handleClose">
+  <div class="modal-container" @click="handleClose">
     <div class="modal-content" @click.stop>
-      <div class="modal-close-button" @click="handleClose">
-        <img src="/icons/close.svg" alt="close" width="28px">
-      </div>
       <div class="modal-header">
-        <h1>Мой профиль</h1>
-        <p>Здесь указана ваша личная инфорамация</p>
+        <h1>Настройки профиля</h1>
+        <img src="/icons/close.svg" alt="close" width="24px" />
       </div>
       <div class="modal-body">
-        <p>Имя: {{user ? user.name : "Unknown"}}</p>
-        <p>Email: {{user ? user.email : "Unknown"}}</p>
-        <p>Группа: {{user ? user.Group.name : "Unknown"}}</p>
+        <div class="avatar-block">
+
+        </div>
+        <div class="input-block">
+
+        </div>
       </div>
-      <button
-        class="exit_btn"
-        @click="LogOut"
-      >
-        <img width="20px" src="/icons/exit-red.svg" alt="exit">
-        Выйти из профиля
-      </button>
     </div>
   </div>
 </template>
@@ -79,25 +60,15 @@ watch(() => props.isOpen, (newValue) => {
   bottom: 0;
   width: 100%;
   height: 100vh;
-  visibility: hidden;
-  opacity: 0;
   z-index: 1003;
+
+  opacity: 0;
 
   display: flex;
   align-items: center;
   justify-content: center;
-
-  &.active {
-    background-color: rgba(black, .1);
-    backdrop-filter: blur(4px);
-    visibility: visible;
-    opacity: 1;
-
-    &.dark-theme {
-      background: rgba(white, 0.1);
-    }
-  }
 }
+
 .modal-content {
   display: flex;
   flex-direction: column;
@@ -109,22 +80,22 @@ watch(() => props.isOpen, (newValue) => {
 
   border-radius: 16px;
 
-  & > .modal-header{
+  opacity: 0;
+  transform: scale(0.8);
+
+  & > .modal-header {
     display: flex;
     flex-direction: column;
     gap: 10px;
+
     & > h1 {
       font-size: 24px;
       text-align: center;
     }
-    & > p {
-      font-size: 16px;
-      text-align: center;
-      opacity: 0.6;
-    }
   }
 }
-.modal-body{
+
+.modal-body {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -141,7 +112,8 @@ watch(() => props.isOpen, (newValue) => {
     opacity: 0.7;
   }
 }
-.exit_btn{
+
+.exit_btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,11 +128,12 @@ watch(() => props.isOpen, (newValue) => {
   opacity: 0.7;
   color: $red-color !important;
 
-  &:hover{
+  &:hover {
     opacity: 0.99;
   }
 }
-.modal-close-button{
+
+.modal-close-button {
   cursor: pointer;
   padding: 4px;
   border-radius: 32px;
@@ -170,7 +143,7 @@ watch(() => props.isOpen, (newValue) => {
   right: calc(-36px - 12px);
 
   opacity: 0.6;
-  &:hover{
+  &:hover {
     opacity: 0.8;
   }
   & > img {

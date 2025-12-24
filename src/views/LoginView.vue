@@ -6,15 +6,19 @@ import { storeToRefs } from 'pinia'
 import { useNotification } from '@/composables/useNotification'
 import { useRouter } from 'vue-router'
 import Spinner from '@/components/UI/Spinner.vue'
+import { useUserStore } from '@/stores/user.store.ts'
+
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const { isLoading, error } = storeToRefs(authStore)
+const { user } = storeToRefs(userStore)
+const { login } = authStore
+const { infoNotification } = useNotification()
 
 const router = useRouter()
 const email = ref('')
 const password = ref('')
 const isPasswordVisible = ref(false)
-const authStore = useAuthStore()
-const { isLoading, error } = storeToRefs(authStore)
-const { login } = authStore
-const { infoNotification } = useNotification()
 
 const auth = async () => {
   if (email.value && password.value) {
@@ -28,7 +32,7 @@ const auth = async () => {
       infoNotification('Ошибка: ' + error.value.toString())
     } else {
       await router.push('/')
-      infoNotification('Успешная авторизация, добро пожаловать в Notely!')
+      infoNotification(`👋 ${user.value!.name}, рады приветствовать тебя в Notely!`)
     }
   } else {
     infoNotification('Введите корректные данные, возможно вы указали не все поля')

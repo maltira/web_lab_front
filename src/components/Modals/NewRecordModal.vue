@@ -5,11 +5,7 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user.store.ts'
 import Spinner from '@/components/UI/Spinner.vue'
 import type { CreateUserRequest } from '@/types/user.entity.ts'
-import { useThemeStore } from '@/stores/theme.store.ts'
-import SelectRoleModal from '@/components/UI/modal/SelectRoleModal.vue'
-
-const themeStore = useThemeStore()
-const { theme } = storeToRefs(themeStore)
+import SelectRoleModal from '@/components/Modals/SelectRoleModal.vue'
 
 const userStore = useUserStore()
 const { isLoading } = storeToRefs(userStore)
@@ -82,7 +78,7 @@ watch(() => props.isOpen, (newValue) => {
 </script>
 
 <template>
-  <div class="modal-container" :class="{active: isOpen, 'dark-theme': theme === 'dark'}" @click="handleClose">
+  <div class="modal-container" :class="{active: isOpen }" @click="handleClose">
     <div class="modal-content" @click.stop>
       <div class="modal-close-button" @click="handleClose" >
         <img src="/icons/close.svg" alt="close" width="28px">
@@ -96,11 +92,11 @@ watch(() => props.isOpen, (newValue) => {
         <input v-model="email" required type="email" placeholder="Введите email">
         <div class="password-input">
           <input v-model="password" required :type="isPasswordVisible ? 'text' : 'password'" placeholder="Введите пароль">
-          <img :src="isPasswordVisible ? (theme == 'dark' ? '/icons/eye-closed-white.svg' : '/icons/eye-closed.svg') : (theme == 'dark' ? '/icons/eye-white.svg' : '/icons/eye.svg')" alt="visible" @click="isPasswordVisible = !isPasswordVisible">
+          <img :src="isPasswordVisible ? '/icons/eye-closed.svg' : '/icons/eye.svg'" alt="visible" @click="isPasswordVisible = !isPasswordVisible">
         </div>
         <button class="btn-select-role" @click="toggleRoleModal">
           <span>{{groupName ? groupName : 'Выберите роль'}}</span>
-          <img :src="theme === 'dark' ? 'icons/edit-white.svg' : 'icons/edit.svg'" alt="edit" width="16px" />
+          <img src="/icons/edit.svg" alt="edit" width="16px" />
         </button>
       </div>
       <div class="modal-actions">
@@ -108,10 +104,6 @@ watch(() => props.isOpen, (newValue) => {
           class="submit_action"
           @click="CreateUser"
           :class="{'disabled': !isCreateAvailable || isLoading}"
-          :style="{
-            background: theme === 'dark' ? 'var(--white-primary)' : 'var(--black-primary)',
-            color: theme === 'dark' ? 'var(--black-primary)' : 'var(--white-primary)',
-          }"
         >
           {{!isLoading ? "Добавить" : ""}}
           <Spinner size="small" v-if="isLoading"/>
@@ -119,10 +111,6 @@ watch(() => props.isOpen, (newValue) => {
         <button
           class="cancel_action"
           @click="handleClose"
-          :style="{
-            border: theme === 'dark' ? '1px solid var(--white-primary)' : '1px solid var(--black-primary)',
-            color: theme === 'dark' ? 'var(--white-primary)' : 'var(--black-primary)',
-          }"
         >
           Отмена
         </button>
@@ -165,7 +153,7 @@ watch(() => props.isOpen, (newValue) => {
   display: flex;
   flex-direction: column;
   gap: 35px;
-  background: $background-color;
+  background: $white-primary;
   width: 500px;
   position: relative;
   padding: 40px;

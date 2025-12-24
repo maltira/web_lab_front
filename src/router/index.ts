@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
+import Publications from '@/views/publication/Publications.vue'
 import LoginView from '@/views/LoginView.vue'
 import AdminView from '@/views/AdminView.vue'
 import { useUserStore } from '@/stores/user.store.ts'
@@ -11,8 +11,8 @@ import NewPublication from '@/views/publication/NewPublication.vue'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'Home',
-    component: HomeView,
+    name: 'Publications',
+    component: Publications,
   },
   {
     path: '/admin',

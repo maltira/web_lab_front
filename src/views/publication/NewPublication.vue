@@ -6,6 +6,7 @@ import { storeToRefs } from 'pinia'
 import router from '@/router'
 import { onMounted, ref } from 'vue'
 import { useUserStore } from '@/stores/user.store.ts'
+import CategoryModal from '@/components/Modals/CategoryModal.vue'
 
 const userStore = useUserStore()
 const { infoNotification } = useNotification()
@@ -17,6 +18,19 @@ const { error } = storeToRefs(publicationStore)
 const title = ref<string>('')
 const description = ref<string>('')
 const categories = ref<string[]>([])
+
+const isCategoryModalOpen = ref(false)
+const toggleCategoryModal = () => {
+  isCategoryModalOpen.value = !isCategoryModalOpen.value
+}
+
+const addCategory = (category: string) => {
+  categories.value.push(category)
+}
+
+const removeCategory = (id: number) => {
+  categories.value = categories.value.filter((_, i) => i !== id)
+}
 
 const CreatePublication = async () => {
   const req: PublicationRequest = {
@@ -88,17 +102,22 @@ onMounted(() => {
         <div class="input-form">
           <p class="input-info">Укажите категории (не более 4) <span class="required">*</span></p>
           <div class="categories">
-            <button class="add-category">
+            <button
+              class="add-category"
+              @click="toggleCategoryModal"
+              :class="{ disabled: categories.length >= 4 }"
+            >
               <img src="/icons/add.svg" alt="add" />
               Добавить
             </button>
-            <button class="added-btn active">
+            <button
+              class="added-btn active"
+              v-for="(el, i) in categories"
+              :key="i"
+              @click="removeCategory(i)"
+            >
               <img src="/icons/close-white.svg" alt="close" />
-              Культура
-            </button>
-            <button class="added-btn active">
-              <img src="/icons/close-white.svg" alt="close" />
-              Новости
+              {{ el }}
             </button>
           </div>
         </div>
@@ -125,6 +144,14 @@ onMounted(() => {
       </div>
     </div>
   </div>
+
+  <CategoryModal
+    v-if="isCategoryModalOpen"
+    :is-open="isCategoryModalOpen"
+    :categories="categories"
+    @close="() => {console.log('close'); isCategoryModalOpen = false}"
+    @select-category="addCategory"
+  />
 </template>
 
 <style scoped lang="scss">

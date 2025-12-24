@@ -78,14 +78,6 @@ onMounted(async () => {
           }}
         </h1>
       </div>
-      <button
-        v-if="(user && user.Group.name === 'Админ') || (user && user.Group.can_publish_posts)"
-        @click="toggleNewPostModal"
-        class="button new-post"
-      >
-        <img src="/icons/add.svg" alt="add" />
-        Новая публикация
-      </button>
     </div>
     <div class="list-publication" v-if="!isLoading && allPublications.length > 0">
       <div
@@ -140,8 +132,6 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .publications_page {
-  margin-top: 80px;
-  padding: 50px 50px;
   display: flex;
   flex-direction: column;
 }

@@ -4,7 +4,7 @@ import type { UpdatedUser, UserEntity } from '@/types/user.entity.ts'
 import Spinner from '@/components/UI/Spinner.vue'
 import { useUserStore } from '@/stores/user.store.ts'
 import { storeToRefs } from 'pinia'
-import SelectRoleModal from '@/components/UI/modal/SelectRoleModal.vue'
+import SelectRoleModal from '@/components/Modals/SelectRoleModal.vue'
 
 const userStore = useUserStore()
 const { isLoading } = storeToRefs(userStore)

@@ -5,10 +5,10 @@ import { computed, onMounted } from 'vue'
 import AppHeader from '@/components/Layout/AppHeader.vue'
 import { useRoute } from 'vue-router'
 import Notification from '@/components/UI/Notification.vue'
+import AppSidebar from '@/components/Layout/AppSidebar.vue'
 
 const { isAppReady, initApp } = useAppInit()
 const route = useRoute()
-
 
 const hideHeader = computed(() => {
   return route.meta.hideHeader === true
@@ -20,20 +20,40 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Spinner v-if="!isAppReady" :style="{height:'100vh'}" />
+  <Spinner v-if="!isAppReady" :style="{ height: '100vh' }" />
 
   <template v-else>
-    <AppHeader v-if="!hideHeader"/>
-    <div class="main-content" :class="{ 'full-height': hideHeader }">
-      <RouterView/>
+    <AppHeader v-if="!hideHeader" />
+    <div class="main-content">
+      <AppSidebar v-if="!hideHeader" />
+      <div class="page-view" :class="{ 'default': hideHeader }">
+        <RouterView />
+      </div>
     </div>
   </template>
 
-  <Notification/>
+  <Notification />
 </template>
 
 <style lang="scss" scoped>
-.main-content{
+.main-content {
+  display: flex;
   background: $white-primary;
+}
+
+.page-view {
+  height: calc(100vh - 150px);
+  width: 100%;
+  padding: 24px;
+
+  overflow-y: scroll;
+
+  &.default {
+    height: 100vh;
+    padding: 0;
+    overflow: auto;
+  }
+
+  transition: none;
 }
 </style>

@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth.store'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user.store.ts'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { usePublicationStore } from '@/stores/publication.store.ts'
 
 const router = useRouter()
+const route = useRoute()
+
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const publicationStore = usePublicationStore()
@@ -16,6 +18,15 @@ const { logout } = authStore
 const { isAuthenticated } = storeToRefs(authStore)
 const { user } = storeToRefs(userStore)
 
+const routes = [
+  { group: 'Главная', path: '/', name: 'Все публикации', icon: 'home.svg' },
+  { group: 'Главная', path: '/categories', name: 'Категории', icon: 'category.svg' },
+  { group: 'Главная', path: '/authors', name: 'Авторы', icon: 'user.svg' },
+  { group: 'Личное', path: '/my-publications', name: 'Мои публикации', icon: 'box.svg' },
+  { group: 'Личное', path: '/drafts', name: 'Черновики', icon: 'page.svg' },
+  { group: 'Личное', path: '/saved', name: 'Сохраненное', icon: 'saved.svg' },
+  { group: 'Личное', path: '/subscriptions', name: 'Мои подписки', icon: 'user-check.svg' },
+]
 
 const isSearchOpen = ref(false)
 const search = ref('')
@@ -54,6 +65,9 @@ const goToLogout = async () => {
   await logout()
 }
 
+const currentRoute = computed(() => {
+  return routes.find((r) => route.path === r.path)
+})
 </script>
 
 <template>
@@ -73,10 +87,14 @@ const goToLogout = async () => {
     <div class="right-side-nav">
       <div class="top-side">
         <div class="route">
-          <p class="block">Главная</p>
+          <p class="block">{{ currentRoute ? currentRoute.group : 'Не понятненько' }}</p>
           <p class="divider">/</p>
-          <img class="icon-route" src="/icons/user.svg" alt="icon" />
-          <p class="name-route">Добро пожаловать!</p>
+          <img
+            class="icon-route"
+            :src="`/icons/${currentRoute ? currentRoute.icon : 'file-outline.svg'}`"
+            alt="icon"
+          />
+          <p class="name-route">{{ currentRoute ? currentRoute.name : '404' }}</p>
         </div>
         <p class="logotype" @click="goToHome">Notely</p>
       </div>
@@ -100,7 +118,11 @@ const goToLogout = async () => {
           />
         </form>
         <div class="buttons">
-          <button v-if="isAuthenticated" class="btn add" @click="router.push('/publication/create')">
+          <button
+            v-if="isAuthenticated"
+            class="btn add"
+            @click="router.push('/publication/create')"
+          >
             <img src="/icons/add.svg" alt="add" />
             Создать запись
           </button>
@@ -110,7 +132,7 @@ const goToLogout = async () => {
           </button>
           <button class="btn-select-view">
             <img src="/icons/four-block.svg" class="active" alt="blocks" />
-            <img src="/icons/columns.svg" alt="columns" />
+            <img src="/icons/columns.svg" alt="columns" :style="{ transform: 'rotate(90deg)' }" />
           </button>
         </div>
       </div>
@@ -140,6 +162,7 @@ const goToLogout = async () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  flex-shrink: 0;
 
   padding: 24px;
   width: 280px;

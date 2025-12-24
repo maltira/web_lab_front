@@ -1,5 +1,5 @@
 <script setup lang="ts">
-
+import router from '@/router'
 </script>
 
 <template>
@@ -8,7 +8,7 @@
       <h1>404</h1>
       <p>Такой страницы не существует</p>
     </div>
-    <RouterLink to="/">Главное меню</RouterLink>
+    <button @click="router.push('/')">Главное меню</button>
   </div>
 </template>
 
@@ -18,10 +18,9 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 50px;
-  height: 100vh;
-
   gap: 40px;
+
+  height: 100%;
 
   & > div {
     display: flex;
@@ -29,26 +28,20 @@
     gap: 15px;
 
     & > h1 {
+      @include h1-text;
       font-size: 100px;
       text-align: center;
     }
+
+    & > p {
+      @include main-text;
+
+      opacity: 0.7;
+    }
   }
 
-  & > a {
-    padding: 8px 20px;
-
-    background: rgba(gray, 0.2);
-    width: fit-content;
-    border-radius: 12px;
-
-    text-align: center;
-    font-size: 16px;
-
-    opacity: 0.7;
-
-    &:hover{
-      opacity: 0.9;
-    }
+  & > button {
+    @include button-icon;
   }
 }
 </style>
