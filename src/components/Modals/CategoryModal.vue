@@ -22,7 +22,6 @@ const handleClose = () => {
   if (category_modal && category_modal_content) {
     category_modal.style.opacity = '0'
     category_modal_content.style.transform = 'scale(0.8)'
-    console.log('styles updated')
   }
   setTimeout(() => {
     emit('close')
@@ -56,7 +55,7 @@ onMounted(() => {
   const category_modal_content = document.getElementById('category_modal_content')
 
   document.addEventListener('keydown', handleKeydown)
-  console.log('onMounted')
+
   if (category_modal && category_modal_content) {
     setTimeout(() => {
       category_modal.style.opacity = '1'

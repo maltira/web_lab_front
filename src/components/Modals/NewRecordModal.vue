@@ -60,7 +60,6 @@ const CreateUser = async () => {
       email: email.value,
       name: name.value,
       password: password.value,
-      group_id: groupID.value,
     }
     await props.createUser(req)
     handleClose()

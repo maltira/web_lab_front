@@ -1,7 +1,25 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import SettingsModal from '@/components/Modals/SettingsModal.vue'
+import { onMounted, ref } from 'vue'
+import { useUserStore } from '@/stores/user.store.ts'
+import { storeToRefs } from 'pinia'
+import type { UpdatedGreeting } from '@/types/user.entity.ts'
+import { useNotification } from '@/composables/useNotification.ts'
 
 const route = useRoute()
+
+const { infoNotification } = useNotification()
+const userStore = useUserStore()
+const { user, error } = storeToRefs(userStore)
+const { updateUserGreeting } = userStore
+
+const isSettingsOpen = ref(false)
+const isGreetingClosed = ref(false)
+
+const toggleSettings = () => {
+  isSettingsOpen.value = !isSettingsOpen.value
+}
 
 const routes = [
   [
@@ -16,6 +34,25 @@ const routes = [
     { path: '/subscriptions', name: 'Мои подписки', icon: 'user-check.svg' },
   ],
 ]
+
+const updateGreeting = async () => {
+  const req: UpdatedGreeting = {
+    id: user.value!.id,
+    is_greeting_closed: true,
+  }
+  isGreetingClosed.value = true
+  await updateUserGreeting(req)
+
+  if (error.value) {
+    infoNotification('❌' + error.value)
+  }
+}
+
+onMounted(() => {
+  if (user.value) {
+    isGreetingClosed.value = user.value.is_greeting_closed
+  }
+})
 </script>
 
 <template>
@@ -28,12 +65,13 @@ const routes = [
             to="/greeting"
             class="tab-container close"
             :class="{ active: route.path === 'greeting' }"
+            v-if="!isGreetingClosed"
           >
             <div class="route">
               <img src="/icons/mood.svg" alt="img" />
               Добро пожаловать
             </div>
-            <img class="close-container" src="/icons/close.svg" alt="close" />
+            <img @click.stop.prevent @click="updateGreeting" class="close-container" src="/icons/close.svg" alt="close" />
           </RouterLink>
           <RouterLink
             v-for="(el, i) in routes[0]"
@@ -70,7 +108,7 @@ const routes = [
           <img src="/icons/notif.svg" alt="img" />
           Уведомления
         </button>
-        <button class="tab-container">
+        <button class="tab-container" @click="toggleSettings">
           <img src="/icons/settings.svg" alt="img" />
           Настройки
         </button>
@@ -81,6 +119,8 @@ const routes = [
       </div>
     </div>
   </div>
+
+  <SettingsModal v-if="isSettingsOpen" @close="isSettingsOpen = false" />
 </template>
 
 <style scoped lang="scss">

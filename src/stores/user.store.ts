@@ -1,5 +1,10 @@
 import { defineStore } from 'pinia'
-import type { CreateUserRequest, UpdatedUser, UserEntity } from '@/types/user.entity.ts'
+import type {
+  CreateUserRequest,
+  UpdatedGreeting,
+  UpdatedUser,
+  UserEntity,
+} from '@/types/user.entity.ts'
 import type {ErrorResponse, MessageResponse} from '@/types/error.entity.ts'
 import { userService } from '@/api/user.service.ts'
 import { isErrorResponse } from '@/utils/response_type.ts'
@@ -24,26 +29,27 @@ export const useUserStore = defineStore('user', {
 
       const query = state.searchQuery.toLowerCase()
       if (state.filterQuery) {
-        return filterUsersArray(state.users, state.filterQuery).filter(user =>
+        return filterUsersArray(state.users, state.filterQuery).filter(
+          (user) =>
             user.id.includes(query) ||
             user.name.toLowerCase().includes(query) ||
             user.email.toLowerCase().includes(query) ||
-            user.Group.name.toLowerCase().includes(query)
+            user.Group.name.toLowerCase().includes(query),
         )
-      }
-      else
-        return state.users.filter(user =>
-          user.id.includes(query) ||
-          user.name.toLowerCase().includes(query) ||
-          user.email.toLowerCase().includes(query) ||
-          user.Group.name.toLowerCase().includes(query)
+      } else
+        return state.users.filter(
+          (user) =>
+            user.id.includes(query) ||
+            user.name.toLowerCase().includes(query) ||
+            user.email.toLowerCase().includes(query) ||
+            user.Group.name.toLowerCase().includes(query),
         )
     },
     filteredGroups: (state) => {
       return [...state.groups]
         .sort((a, b) => a.name.localeCompare(b.name))
         .filter((group) => group.is_available)
-    }
+    },
   },
   actions: {
     setUser(user: UserEntity) {
@@ -71,12 +77,10 @@ export const useUserStore = defineStore('user', {
         // Пришёл ответ User (200)
         this.setUser(response)
         return response
-      }
-      catch {
+      } catch {
         this.error = 'Ошибка получения данных пользователя, повторите попытку авторизации'
         return null
-      }
-      finally {
+      } finally {
         this.isLoading = false // Завершаем загрузку
       }
     },
@@ -95,12 +99,10 @@ export const useUserStore = defineStore('user', {
         }
         // Пришёл ответ User (200)
         return response
-      }
-      catch {
+      } catch {
         this.error = 'Ошибка получения данных пользователя, повторите попытку'
         return null
-      }
-      finally {
+      } finally {
         this.isLoading = false
       }
     },
@@ -119,18 +121,16 @@ export const useUserStore = defineStore('user', {
         }
         // Пришёл ответ User (200)
         return response
-      }
-      catch {
+      } catch {
         this.error = 'Ошибка получения данных пользователя, повторите попытку'
         return null
-      }
-      finally {
+      } finally {
         this.isLoading = false
       }
     },
 
     async fetchAllUsers(): Promise<UserEntity[] | null> {
-      try{
+      try {
         this.isLoading = true
         this.error = null
 
@@ -144,12 +144,10 @@ export const useUserStore = defineStore('user', {
         }
 
         return response
-      }
-      catch {
+      } catch {
         this.error = 'Ошибка получения пользователей, повторите попытку'
         return null
-      }
-      finally {
+      } finally {
         this.isLoading = false
       }
     },
@@ -165,18 +163,37 @@ export const useUserStore = defineStore('user', {
           this.error = response.error
           return null
         }
+
         return true
-      }
-      catch {
+      } catch (e) {
         this.error = 'Ошибка обновления пользователя, повторите попытку'
         return null
+      } finally {
+        this.isLoading = false
       }
-      finally {
+    },
+    async updateUserGreeting(req: UpdatedGreeting): Promise<boolean | null> {
+      try {
+        this.isLoading = true
+        this.error = null
+
+        const response: MessageResponse | ErrorResponse = await userService.updateUserGreeting(req)
+
+        if (isErrorResponse(response)) {
+          this.error = response.error
+          return null
+        }
+
+        return true
+      } catch (e) {
+        this.error = 'Ошибка обновления пользователя, повторите попытку'
+        return null
+      } finally {
         this.isLoading = false
       }
     },
 
-    async deleteUser(userID: string): Promise<boolean | null > {
+    async deleteUser(userID: string): Promise<boolean | null> {
       try {
         this.isLoading = true
         this.error = null
@@ -189,12 +206,10 @@ export const useUserStore = defineStore('user', {
         }
 
         return true
-      }
-      catch {
+      } catch {
         this.error = 'Ошибка удаления пользователя, повторите попытку'
         return null
-      }
-      finally {
+      } finally {
         this.isLoading = false
       }
     },
@@ -212,12 +227,10 @@ export const useUserStore = defineStore('user', {
         }
 
         return true
-      }
-      catch {
+      } catch {
         this.error = 'Ошибка создания пользователя, повторите попытку'
         return null
-      }
-      finally {
+      } finally {
         this.isLoading = false
       }
     },
@@ -229,7 +242,7 @@ export const useUserStore = defineStore('user', {
 
         const response: GroupEntity[] | ErrorResponse = await userService.fetchGroups()
 
-        if (isErrorResponse(response)){
+        if (isErrorResponse(response)) {
           this.error = response.error
           return null
         }
@@ -237,14 +250,12 @@ export const useUserStore = defineStore('user', {
         this.groups = response
 
         return response
-      }
-      catch {
-        this.error = "Ошибка получения групп, повторите попытку"
+      } catch {
+        this.error = 'Ошибка получения групп, повторите попытку'
         return null
-      }
-      finally {
+      } finally {
         this.isLoading = false
       }
-    }
+    },
   },
 })

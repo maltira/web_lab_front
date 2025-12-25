@@ -1,5 +1,10 @@
 import config from '@/config'
-import type {CreateUserRequest, UpdatedUser, UserEntity} from '@/types/user.entity.ts'
+import type {
+  CreateUserRequest,
+  UpdatedGreeting,
+  UpdatedUser,
+  UserEntity,
+} from '@/types/user.entity.ts'
 import type {ErrorResponse, MessageResponse} from '@/types/error.entity.ts'
 import type { GroupEntity } from '@/types/group.entity.ts'
 
@@ -10,7 +15,7 @@ class UserService {
   async fetchCurrentUser(): Promise<UserEntity | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/user`, {
       method: 'GET',
-      credentials: "include"
+      credentials: 'include',
     })
     return response.json()
   }
@@ -18,7 +23,7 @@ class UserService {
   async fetchUserByID(id: string): Promise<UserEntity | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/user/${id}`, {
       method: 'GET',
-      credentials: "include"
+      credentials: 'include',
     })
     return response.json()
   }
@@ -26,7 +31,7 @@ class UserService {
   async fetchUserByEmail(email: string): Promise<UserEntity | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/user/email/${email}`, {
       method: 'GET',
-      credentials: "include"
+      credentials: 'include',
     })
     return response.json()
   }
@@ -34,7 +39,7 @@ class UserService {
   async fetchAllUsers(): Promise<UserEntity[] | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/user/all`, {
       method: 'GET',
-      credentials: "include"
+      credentials: 'include',
     })
     return response.json()
   }
@@ -42,7 +47,15 @@ class UserService {
   async updateUser(req: UpdatedUser): Promise<MessageResponse | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/user`, {
       method: 'PUT',
-      credentials: "include",
+      credentials: 'include',
+      body: JSON.stringify(req),
+    })
+    return response.json()
+  }
+  async updateUserGreeting(req: UpdatedGreeting): Promise<MessageResponse | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/user/greeting`, {
+      method: 'PUT',
+      credentials: 'include',
       body: JSON.stringify(req),
     })
     return response.json()
@@ -59,7 +72,7 @@ class UserService {
   async createUser(req: CreateUserRequest): Promise<MessageResponse | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/user`, {
       method: 'POST',
-      credentials: "include",
+      credentials: 'include',
       body: JSON.stringify(req),
     })
     return response.json()
@@ -68,7 +81,7 @@ class UserService {
   async fetchGroups(): Promise<GroupEntity[] | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/group/all`, {
       method: 'GET',
-      credentials: "include",
+      credentials: 'include',
     })
     return response.json()
   }

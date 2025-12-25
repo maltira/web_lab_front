@@ -38,7 +38,7 @@
     }
   }
 
-  &:focus, &.active {
+  &:focus {
     color: rgba($black-primary, 0.99);
     & > img {
       opacity: 0.99;
@@ -47,6 +47,10 @@
     &::placeholder {
       color: rgba($black-primary, 0.6);
     }
+  }
+
+  &.active {
+    color: rgba($black-primary, 0.99);
   }
 
   &.error {
@@ -93,13 +97,17 @@
     }
   }
 
-  &:focus, &.active {
+  &:focus {
     color: rgba($black-primary, 0.99);
     border-color: rgba($black-primary, 0.8);
 
     &::placeholder {
       color: rgba($black-primary, 0.8);
     }
+  }
+
+  &.active {
+    color: rgba($black-primary, 0.99);
   }
 
   &.error {
@@ -148,7 +156,7 @@
     }
   }
 
-  &:focus, &.active {
+  &:focus {
     border-color: rgba($black-primary, 0.8);
 
     & > input {
@@ -157,6 +165,10 @@
         color: rgba($black-primary, 0.8);
       }
     }
+  }
+
+  &.active {
+    color: rgba($black-primary, 0.99);
   }
 
   &.error {

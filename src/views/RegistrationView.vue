@@ -25,7 +25,6 @@ const registrationUser = async () => {
       name: name.value,
       email: email.value,
       password: password.value,
-      group_id: '700c704d-f5c9-4a95-ad9e-c040b4429050',
     }
     await registration(req)
 
@@ -33,7 +32,7 @@ const registrationUser = async () => {
       infoNotification('Ошибка: ' + error.value.toString())
     } else {
       await router.push('/')
-      infoNotification('Успешная регистрация, добро пожаловать в Notely!')
+      infoNotification('👋 Успешная регистрация, добро пожаловать в Notely!')
     }
   } else {
     infoNotification(

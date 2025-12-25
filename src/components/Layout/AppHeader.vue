@@ -73,7 +73,17 @@ const currentRoute = computed(() => {
 <template>
   <div class="header">
     <div class="left-side-nav">
-      <div class="avatar">{{ user ? user.name[0] : 'Ч' }}</div>
+      <div class="avatar-block_preview">
+        <img
+          v-if="user && user.avatar"
+          class="avatar-preview"
+          :src="`/img/avatars/${user.avatar}`"
+          alt="avatar"
+        />
+        <div class="avatar-preview none" v-else>
+          {{ user ? user.name[0] : 'Ч' }}
+        </div>
+      </div>
       <div class="user-info">
         <div class="user-title">
           <p class="username">{{ user ? user.name : 'Читатель' }}</p>
@@ -171,18 +181,27 @@ const currentRoute = computed(() => {
   border-right: 1px solid rgba($black-primary, 0.1);
   border-bottom: 1px solid rgba($black-primary, 0.1);
 
-  & > .avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  & > .avatar-block_preview {
+    width: fit-content;
 
-    width: 50px;
-    height: 50px;
-    border-radius: 100%;
-    background: rgba($blue-color, 0.1);
+    & > .avatar-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-    cursor: default;
-    color: $blue-color;
+      width: 50px;
+      height: 50px;
+
+      border: 1px solid rgba($black-primary, 0.1);
+      border-radius: 100%;
+
+      cursor: default;
+
+      &.none {
+        color: $blue-color;
+        background: rgba($blue-color, 0.1);
+      }
+    }
   }
 
   & > .user-info {
