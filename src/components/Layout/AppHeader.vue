@@ -5,14 +5,18 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user.store.ts'
 import { computed, ref } from 'vue'
 import { usePublicationStore } from '@/stores/publication.store.ts'
+import { usePubViewStore } from '@/stores/view.store.ts'
 
 const router = useRouter()
 const route = useRoute()
 
+const pubViewStore = usePubViewStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const publicationStore = usePublicationStore()
 
+const { viewMode } = storeToRefs(pubViewStore)
+const { toggleView } = pubViewStore
 const { setSearchQuery } = publicationStore
 const { logout } = authStore
 const { isAuthenticated } = storeToRefs(authStore)
@@ -141,8 +145,19 @@ const currentRoute = computed(() => {
             Фильтры
           </button>
           <button class="btn-select-view">
-            <img src="/icons/four-block.svg" class="active" alt="blocks" />
-            <img src="/icons/columns.svg" alt="columns" :style="{ transform: 'rotate(90deg)' }" />
+            <img
+              src="/icons/four-block.svg"
+              :class="{ active: viewMode === 'multi' }"
+              alt="blocks"
+              @click="toggleView('multi')"
+            />
+            <img
+              src="/icons/columns.svg"
+              :class="{ active: viewMode === 'single' }"
+              alt="rows"
+              :style="{ transform: 'rotate(90deg)' }"
+              @click="toggleView('single')"
+            />
           </button>
         </div>
       </div>

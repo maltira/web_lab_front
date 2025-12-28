@@ -4,8 +4,12 @@ import { usePublicationStore } from '@/stores/publication.store.ts'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/date_format.ts'
 import PublicationItem from '@/components/UI/PublicationItem.vue'
+import { usePubViewStore } from '@/stores/view.store.ts'
 
+const pubViewStore = usePubViewStore()
 const publicationStore = usePublicationStore()
+
+const { viewMode } = storeToRefs(pubViewStore)
 
 const { searchPublicationQuery, allPublications, isLoading } = storeToRefs(publicationStore)
 const { fetchAllPublications, setSearchQuery } = publicationStore
@@ -46,6 +50,8 @@ onMounted(async () => {
         :created_at="formatDate(p.created_at, 'DD/MM/YYYY HH:mm')"
         :author="p.User"
         :background_color="p.background_color"
+
+        :isWide="viewMode === 'single'"
       >
       </PublicationItem>
     </div>

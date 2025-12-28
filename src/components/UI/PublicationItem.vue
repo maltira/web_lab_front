@@ -237,7 +237,7 @@ onUnmounted(() => {
   }
 
   &:hover {
-    transform: translateY(2px);
+    transform: translateY(1px);
     box-shadow: 0 8px 24px 0 rgba($black-primary, 0.05);
   }
 
