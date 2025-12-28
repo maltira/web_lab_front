@@ -3,10 +3,10 @@ import { onMounted, ref } from 'vue'
 import { usePublicationStore } from '@/stores/publication.store.ts'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/date_format.ts'
-import type { PublicationEntity, PublicationRequest } from '@/types/publication.entity.ts'
+import type { PublicationEntity } from '@/types/publication.entity.ts'
 import { useNotification } from '@/composables/useNotification.ts'
 import { useUserStore } from '@/stores/user.store.ts'
-import { parseCategories } from '@/utils/validate_categories.ts'
+import PublicationItem from '@/components/UI/PublicationItem.vue'
 
 const { infoNotification } = useNotification()
 
@@ -14,13 +14,11 @@ const userStore = useUserStore()
 const publicationStore = usePublicationStore()
 
 const { user } = storeToRefs(userStore)
-const { error, searchPublicationQuery, allPublications, isLoading } = storeToRefs(publicationStore)
-const { fetchAllPublications, createPublication, deletePublication, setSearchQuery } =
-  publicationStore
+const { searchPublicationQuery, allPublications, isLoading } = storeToRefs(publicationStore)
+const { fetchAllPublications, setSearchQuery } = publicationStore
 
 const isPublicationModalOpen = ref(false)
 const publicationOpen = ref<PublicationEntity | null>(null)
-const isNewPostModalOpen = ref(false)
 
 const togglePublicationModal = (id: number) => {
   isPublicationModalOpen.value = !isPublicationModalOpen.value
@@ -31,32 +29,11 @@ const togglePublicationModal = (id: number) => {
     publicationOpen.value = null
   }
 }
-const toggleNewPostModal = () => {
-  isNewPostModalOpen.value = !isNewPostModalOpen.value
-}
-
-const DeletePublication = async (id: string) => {
-  await deletePublication(id)
-  if (error.value) {
-    infoNotification('Ошибка: ' + error.value.toString())
-  } else {
-    infoNotification(`Вы успешно удалили публикацию`)
-    isPublicationModalOpen.value = false
-  }
-}
-const CreatePublication = async (req: PublicationRequest) => {
-  await createPublication(req)
-
-  if (error.value) {
-    infoNotification('Ошибка: ' + error.value.toString())
-  } else {
-    infoNotification(`Публикация «${req.title}» создана`)
-    isNewPostModalOpen.value = false
-  }
-}
 
 onMounted(async () => {
   await fetchAllPublications()
+
+  console.log(allPublications.value[0]!.PublicationCategories)
 })
 </script>
 
@@ -64,76 +41,46 @@ onMounted(async () => {
   <div class="publications_page">
     <div class="page-header">
       <div class="search-result-header">
-        <p
-          v-if="searchPublicationQuery"
-          @click="searchPublicationQuery ? setSearchQuery('') : null"
-        >
-          ← Все публикации
-        </p>
         <h1>
+          <img
+            v-if="searchPublicationQuery"
+            src="/icons/arr-black.svg"
+            alt="arr"
+            style="transform: rotate(180deg)"
+            @click="searchPublicationQuery ? setSearchQuery('') : null"
+          />
           {{
             searchPublicationQuery
-              ? `Публикации по запросу «${searchPublicationQuery}»`
+              ? `Результаты по запросу «${searchPublicationQuery}»`
               : 'Все публикации'
           }}
         </h1>
+        <p v-if="searchPublicationQuery">Найдено публикаций: {{ allPublications.length }}</p>
       </div>
     </div>
     <div class="list-publication" v-if="!isLoading && allPublications.length > 0">
-      <div
-        v-for="(p, i) in allPublications"
-        :key="i"
-        class="publication-item"
-        @click="togglePublicationModal(i)"
+      <PublicationItem
+        v-for="p in allPublications"
+        :title="p.title"
+        :description="p.description"
+        :categories="p.PublicationCategories"
+        :created_at="formatDate(p.created_at, 'DD/MM/YYYY HH:mm')"
+        :author="p.User"
+        :background_color="p.background_color"
       >
-        <div class="p-header">
-          <h2>{{ p.title }}</h2>
-          <p>{{ p.description }}</p>
-          <div class="p-categories" v-if="parseCategories(p.categories).length > 0">
-            <div
-              class="category-item"
-              v-for="(c, i) in parseCategories(p.categories).slice(0, 5)"
-              :key="i"
-            >
-              <p>{{ c }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="p-footer">
-          <div class="user-info">
-            <img
-              width="16px"
-              src="/icons/user.svg"
-              alt=""
-            />
-            <p>{{ p.User.name || 'Unknown' }}</p>
-          </div>
-          <p>{{ formatDate(p.created_at, 'DD/MM/YYYY HH:mm') }}</p>
-        </div>
-      </div>
+      </PublicationItem>
     </div>
     <p v-if="!isLoading && allPublications.length === 0" class="search-result-none">
       Ничего не найдено
     </p>
   </div>
-
-<!--  <NewPostModal-->
-<!--    :is-open="isNewPostModalOpen"-->
-<!--    :create-post="CreatePublication"-->
-<!--    @close="isNewPostModalOpen = false"-->
-<!--  />-->
-<!--  <PublicationModal-->
-<!--    :is-open="isPublicationModalOpen"-->
-<!--    :on-delete="DeletePublication"-->
-<!--    :publication="publicationOpen"-->
-<!--    @close="isPublicationModalOpen = false"-->
-<!--  />-->
 </template>
 
 <style scoped lang="scss">
 .publications_page {
   display: flex;
   flex-direction: column;
+  gap: 32px;
 }
 
 .page-header {
@@ -141,56 +88,39 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
 }
-.button {
-  height: 40px;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  opacity: 0.7;
-  cursor: pointer;
-
-  width: fit-content;
-  padding: 10px 20px;
-  background: rgba(gray, 0.2);
-  border-radius: 32px;
-
-  & > img {
-    width: 16px;
-    transform: translateY(1px);
-  }
-
-  &:hover {
-    opacity: 0.9;
-  }
-}
 
 .search-result-header {
   display: flex;
   gap: 10px;
   flex-direction: column;
-  margin-bottom: 35px;
+
   & > h1 {
+    @include h2-text;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-size: 36px;
+
+    & > img {
+      opacity: 0.7;
+      cursor: pointer;
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
   & > p {
-    font-size: 16px;
-    opacity: 0.7;
-    cursor: pointer;
-
-    &:hover {
-      opacity: 0.9;
-    }
+    @include button-text;
+    opacity: 0.6;
   }
 }
 .search-result-none {
+  @include button-text;
   height: 400px;
   display: flex;
   justify-content: center;
   align-items: center;
   opacity: 0.7;
-  padding: 10px;
 }
 
 .list-publication {

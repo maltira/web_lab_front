@@ -141,6 +141,23 @@
   }
 }
 
+@mixin info-block {
+  @include button-text;
+
+  display: flex;
+  gap: 6px;
+
+  padding: 2px 5px;
+  border-radius: 4px;
+
+  background: $gray-primary;
+  color: #7D7D7D;
+
+  & > img {
+    opacity: 0.5;
+  }
+}
+
 @mixin sidebar-tab {
   @include button-text;
 

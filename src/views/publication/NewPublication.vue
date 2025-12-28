@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import type { PublicationRequest } from '@/types/publication.entity.ts'
+import type { PublicationCategories, PublicationRequest } from '@/types/publication.entity.ts'
 import { useNotification } from '@/composables/useNotification.ts'
 import { usePublicationStore } from '@/stores/publication.store.ts'
 import { storeToRefs } from 'pinia'
 import router from '@/router'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useUserStore } from '@/stores/user.store.ts'
 import CategoryModal from '@/components/Modals/CategoryModal.vue'
+import PublicationItem from '@/components/UI/PublicationItem.vue'
+import { ChromePicker } from 'vue-color'
+import SelectCategoryStyleModal from '@/components/Modals/SelectCategoryStyleModal.vue'
 
 const userStore = useUserStore()
 const { infoNotification } = useNotification()
@@ -17,15 +20,59 @@ const { error } = storeToRefs(publicationStore)
 
 const title = ref<string>('')
 const description = ref<string>('')
-const categories = ref<string[]>([])
+const categories = ref<PublicationCategories[]>([])
+const backgroundColor = ref<string>('#f6f6f6')
+const pickerPosition = ref({ x: 0, y: 0 })
 
+const selectedCategory = ref<PublicationCategories | null>(null)
+const selectedCategoryID = ref<string>('')
+
+const isCategoryStylePickerOpen = ref(false)
+const isBackgroundPickerOpen = ref(false)
 const isCategoryModalOpen = ref(false)
 const toggleCategoryModal = () => {
   isCategoryModalOpen.value = !isCategoryModalOpen.value
 }
+const toggleBackgroundPicker = () => {
+  isCategoryStylePickerOpen.value = false
+  isBackgroundPickerOpen.value = false
+  isBackgroundPickerOpen.value = !isBackgroundPickerOpen.value
+
+  if (isBackgroundPickerOpen.value) {
+    setTimeout(() => {
+      const bg_picker = document.getElementById('bg-picker')
+      if (bg_picker) {
+        bg_picker.style.opacity = '1'
+        bg_picker.style.transform = 'scale(1)'
+      }
+    }, 1)
+  }
+}
+const toggleCategoryStylePicker = (category: PublicationCategories, id: string) => {
+  isBackgroundPickerOpen.value = false
+  isCategoryStylePickerOpen.value = false
+  isCategoryStylePickerOpen.value = !isCategoryStylePickerOpen.value
+
+  if (isCategoryStylePickerOpen.value) {
+    selectedCategory.value = category
+    selectedCategoryID.value = id
+    if (!selectedCategory.value.background_color) {
+      selectedCategory.value.background_color = '#f6f6f6'
+    }
+    if (!selectedCategory.value.text_color) {
+      selectedCategory.value.text_color = '#7d7d7d'
+    }
+  }
+}
 
 const addCategory = (category: string) => {
-  categories.value.push(category)
+  categories.value.push({
+    background_color: "#f6f6f6",
+    text_color: "#7d7d7d",
+    Category: {
+      name: category.charAt(0).toUpperCase() + category.slice(1),
+    },
+  })
 }
 
 const removeCategory = (id: number) => {
@@ -38,7 +85,10 @@ const CreatePublication = async () => {
     description: description.value,
     categories: categories.value,
     user_id: userStore.user!.id,
+    background_color: backgroundColor.value,
   }
+
+  console.log(req)
   await createPublication(req)
 
   if (error.value) infoNotification('Ошибка: ' + error.value.toString())
@@ -46,6 +96,11 @@ const CreatePublication = async () => {
     infoNotification(`Публикация «${req.title}» создана`)
     await router.push('/')
   }
+}
+
+const handleCursorPosition = (e: MouseEvent) => {
+  pickerPosition.value.x = e.clientX - 220
+  pickerPosition.value.y = e.clientY - 65
 }
 
 onMounted(() => {
@@ -61,68 +116,115 @@ onMounted(() => {
       footer_button.style.transform = 'translateY(0)'
     }, 5)
   }
+
+  document.addEventListener('click', handleCursorPosition)
+})
+onUnmounted(() => {
+  document.removeEventListener('click', handleCursorPosition)
 })
 </script>
 
 <template>
   <div class="new-publication">
-    <div id="main" class="main-content">
-      <div class="title">
-        <div class="info-block">
-          <h1>Новая публикация</h1>
-          <p>Lorem ipsum dolor sit amet consectetur. Est amet cursus dolor nibh venenatis.</p>
+    <div id="main" class="publication_content">
+      <div class="main_content">
+        <div class="title">
+          <div class="info-block">
+            <h1>Новая публикация</h1>
+            <p>
+              Нажмите на нужный элемент публикации справа, чтоб изменить его стилевое оформление
+            </p>
+          </div>
         </div>
-        <div class="close" @click="router.back()">
-          <img src="/icons/close.svg" alt="close" />
-        </div>
-      </div>
-      <div class="inputs-block">
-        <div class="input-form">
-          <p class="input-info">Заголовок <span class="required">*</span></p>
-          <input
-            v-model="title"
-            autocomplete="off"
-            required
-            type="text"
-            placeholder="Введите название"
-            :class="{ active: title }"
-          />
-        </div>
-        <div class="input-form">
-          <p class="input-info">Содержимое <span class="required">*</span></p>
-          <textarea
-            v-model="description"
-            autocomplete="off"
-            required
-            type="text"
-            placeholder="Введите содержимое публикации"
-            :class="{ active: description }"
-          />
-        </div>
-        <div class="input-form">
-          <p class="input-info">Укажите категории (не более 4) <span class="required">*</span></p>
-          <div class="categories">
-            <button
-              class="add-category"
-              @click="toggleCategoryModal"
-              :class="{ disabled: categories.length >= 4 }"
-            >
-              <img src="/icons/add.svg" alt="add" />
-              Добавить
-            </button>
-            <button
-              class="added-btn active"
-              v-for="(el, i) in categories"
-              :key="i"
-              @click="removeCategory(i)"
-            >
-              <img src="/icons/close-white.svg" alt="close" />
-              {{ el }}
-            </button>
+        <div class="inputs-block">
+          <div class="input-form">
+            <p class="input-info">Заголовок <span class="required">*</span></p>
+            <input
+              v-model="title"
+              autocomplete="off"
+              required
+              type="text"
+              placeholder="Введите название"
+              :class="{ active: title }"
+            />
+          </div>
+          <div class="input-form">
+            <p class="input-info">Содержимое <span class="required">*</span></p>
+            <textarea
+              v-model="description"
+              autocomplete="off"
+              required
+              type="text"
+              placeholder="Введите содержимое публикации"
+              :class="{ active: description }"
+            />
+          </div>
+          <div class="input-form">
+            <p class="input-info">Укажите категории (не более 4) <span class="required">*</span></p>
+            <div class="categories">
+              <button
+                class="add-category"
+                @click="toggleCategoryModal"
+                :class="{ disabled: categories.length >= 4 }"
+              >
+                <img src="/icons/add.svg" alt="add" />
+                Добавить
+              </button>
+              <button
+                class="added-btn active"
+                v-for="(el, i) in categories"
+                :key="i"
+                @click="removeCategory(i)"
+              >
+                <img src="/icons/close-white.svg" alt="close" />
+                {{ el.Category.name }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
+      <PublicationItem
+        :title="title"
+        :description="description"
+        :background_color="backgroundColor"
+        :author="userStore.user!"
+        created_at="Сегодня"
+        :categories="categories"
+        :is-view-mode="true"
+        @toggle-bg-picker="toggleBackgroundPicker"
+        @close-bg-picker="isBackgroundPickerOpen = false"
+        @toggle-category-picker="toggleCategoryStylePicker"
+      />
+      <ChromePicker
+        @click.stop
+        id="bg-picker"
+        v-if="isBackgroundPickerOpen"
+        v-model="backgroundColor"
+        :style="{
+          position: 'absolute',
+          left: pickerPosition.x + 'px',
+          top: pickerPosition.y + 'px',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          boxShadow: '0 0 20px 0 rgba(0, 0, 0, 0.1)',
+          opacity: isBackgroundPickerOpen ? 1 : 0,
+          transform: isBackgroundPickerOpen ? 'scale(1)' : 'scale(0.8)',
+          transition: '50ms',
+        }"
+      />
+      <SelectCategoryStyleModal
+        v-if="isCategoryStylePickerOpen"
+        :category_id="selectedCategoryID"
+        :pos_x="pickerPosition.x"
+        :pos_y="pickerPosition.y"
+        :category="selectedCategory!"
+        @close="isCategoryStylePickerOpen = false"
+      />
+      <div class="close" @click="router.back()">
+        <img src="/icons/close.svg" alt="close" />
+      </div>
     </div>
+
     <div id="footer_button" class="action-content">
       <button class="light cancel" @click="router.back()">Отмена</button>
       <div class="other-buttons">
@@ -149,7 +251,11 @@ onMounted(() => {
     v-if="isCategoryModalOpen"
     :is-open="isCategoryModalOpen"
     :categories="categories"
-    @close="() => {console.log('close'); isCategoryModalOpen = false}"
+    @close="
+      () => {
+        isCategoryModalOpen = false
+      }
+    "
     @select-category="addCategory"
   />
 </template>
@@ -162,14 +268,45 @@ onMounted(() => {
 
   height: 100vh;
   padding: 80px 120px;
+  overflow: hidden;
 }
-.main-content {
+.publication_content {
   display: flex;
-  flex-direction: column;
-  gap: 48px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+
+  position: relative;
 
   opacity: 0;
   transform: translateY(-10px);
+
+  & > .main_content {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+
+    width: 100%;
+  }
+  & > .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    padding: 6px;
+    border-radius: 6px;
+    background: $gray-primary;
+    cursor: pointer;
+    & > img {
+      opacity: 0.7;
+    }
+
+    &:hover {
+      & > img {
+        opacity: 0.99;
+      }
+    }
+  }
 }
 
 .title {
@@ -186,21 +323,6 @@ onMounted(() => {
 
       margin-top: 10px;
       opacity: 0.6;
-    }
-  }
-  & > .close {
-    padding: 6px;
-    border-radius: 6px;
-    background: $gray-primary;
-    cursor: pointer;
-    & > img {
-      opacity: 0.7;
-    }
-
-    &:hover {
-      & > img {
-        opacity: 0.99;
-      }
     }
   }
 }

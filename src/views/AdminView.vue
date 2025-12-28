@@ -172,11 +172,6 @@ onUnmounted(() => {
                 :class="{ 'active-filter': filterQuery === 'id' }"
               >
                 ID
-                <img
-                  src="/icons/arrow.svg"
-                  alt="arrow"
-                  width="12px"
-                />
               </button>
             </td>
             <td>
@@ -185,11 +180,6 @@ onUnmounted(() => {
                 :class="{ 'active-filter': filterQuery === 'name' }"
               >
                 Имя
-                <img
-                  src="/icons/arrow.svg"
-                  alt="arrow"
-                  width="12px"
-                />
               </button>
             </td>
             <td>
@@ -198,11 +188,6 @@ onUnmounted(() => {
                 :class="{ 'active-filter': filterQuery === 'email' }"
               >
                 Email
-                <img
-                  src="/icons/arrow.svg"
-                  alt="arrow"
-                  width="12px"
-                />
               </button>
             </td>
             <td>
@@ -211,11 +196,6 @@ onUnmounted(() => {
                 :class="{ 'active-filter': filterQuery === 'group' }"
               >
                 Группа
-                <img
-                  src="/icons/arrow.svg"
-                  alt="arrow"
-                  width="12px"
-                />
               </button>
             </td>
             <td>
@@ -224,11 +204,6 @@ onUnmounted(() => {
                 :class="{ 'active-filter': filterQuery === 'status' }"
               >
                 Статус
-                <img
-                  src="/icons/arrow.svg"
-                  alt="arrow"
-                  width="12px"
-                />
               </button>
             </td>
             <td>
@@ -237,11 +212,6 @@ onUnmounted(() => {
                 :class="{ 'active-filter': filterQuery === 'last_visit' }"
               >
                 Последнее посещение
-                <img
-                  src="/icons/arrow.svg"
-                  alt="arrow"
-                  width="12px"
-                />
               </button>
             </td>
             <td v-if="user && user.Group.name === 'Админ'"></td>
@@ -264,12 +234,6 @@ onUnmounted(() => {
                 @click="changeStatusSelect(i)"
               >
                 {{ usr.is_block ? 'Заблокирован' : 'Доступен' }}
-                <img
-                  src="/icons/arrow.svg"
-                  :class="{ disabled: user && user.Group.name !== 'Админ' }"
-                  alt="arrow"
-                  width="16px"
-                />
               </button>
               <div class="block-status" v-if="openStatusSelect === i" @click.stop>
                 <p
