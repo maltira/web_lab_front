@@ -29,7 +29,7 @@ const togglePublicationModal = (id: string) => {
 }
 
 onMounted(async () => {
-  allPublications.value = await fetchPublicationsByUserID(userStore.user!.id)
+  allPublications.value = await fetchPublicationsByUserID(userStore.user!.id, true)
 })
 </script>
 
@@ -37,7 +37,7 @@ onMounted(async () => {
   <div class="publications_page">
     <div class="page-header">
       <div class="search-result-header">
-        <h1>Мои публикации <span v-if="allPublications" :style="{opacity: 0.3}">({{allPublications.length}})</span></h1>
+        <h1>Мои черновики <span v-if="allPublications" :style="{ opacity: 0.3 }">({{ allPublications.length }})</span></h1>
       </div>
     </div>
     <div class="list-publication skeleton" v-if="isLoading && !allPublications">

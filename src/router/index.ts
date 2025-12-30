@@ -1,4 +1,10 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {
+  createRouter,
+  createWebHistory,
+  type NavigationGuardNext,
+  type RouteLocationNormalizedGeneric,
+  type RouteLocationNormalizedLoadedGeneric,
+} from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import Publications from '@/views/publication/Publications.vue'
 import LoginView from '@/views/auth/LoginView.vue'
@@ -9,6 +15,17 @@ import RegistrationView from '@/views/auth/RegistrationView.vue'
 import NewPublication from '@/views/publication/NewPublication.vue'
 import GreetingView from '@/views/GreetingView.vue'
 import MyPublications from '@/views/publication/MyPublications.vue'
+import DraftsView from '@/views/publication/DraftsView.vue'
+
+const checkAuth = async (to: RouteLocationNormalizedGeneric, from: RouteLocationNormalizedLoadedGeneric, next: NavigationGuardNext) => {
+  const userStore = useUserStore()
+  await userStore.fetchCurrentUser()
+  if (userStore.user) {
+    next()
+  } else {
+    next('/login')
+  }
+}
 
 const routes: RouteRecordRaw[] = [
   {
@@ -31,15 +48,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       hideHeader: true,
     },
-    beforeEnter: async (to, from, next) => {
-      const userStore = useUserStore()
-      await userStore.fetchCurrentUser()
-      if (userStore.user) {
-        next()
-      } else {
-        next('/login')
-      }
-    },
+    beforeEnter: checkAuth,
   },
   {
     path: '/publication/edit/:id',
@@ -49,31 +58,20 @@ const routes: RouteRecordRaw[] = [
       hideHeader: true,
     },
     props: true,
-    beforeEnter: async (to, from, next) => {
-      const userStore = useUserStore()
-      await userStore.fetchCurrentUser()
-      if (userStore.user) {
-        next()
-      } else {
-        next('/login')
-      }
-    },
+    beforeEnter: checkAuth,
   },
   {
     path: '/publications/me',
     name: 'MyPublication',
     component: MyPublications,
-    beforeEnter: async (to, from, next) => {
-      const userStore = useUserStore()
-      await userStore.fetchCurrentUser()
-      if (userStore.user) {
-        next()
-      } else {
-        next('/login')
-      }
-    },
+    beforeEnter: checkAuth,
   },
-
+  {
+    path: '/drafts',
+    name: 'MyDrafts',
+    component: DraftsView,
+    beforeEnter: checkAuth,
+  },
 
   {
     path: '/admin',
@@ -87,7 +85,6 @@ const routes: RouteRecordRaw[] = [
       }
     },
   },
-
 
   {
     path: '/login',
@@ -106,13 +103,11 @@ const routes: RouteRecordRaw[] = [
     },
   },
 
-
   {
     path: '/greeting',
     name: 'Greeting',
     component: GreetingView,
   },
-
 
   {
     path: '/:pathMatch(.*)*',

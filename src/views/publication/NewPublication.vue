@@ -107,41 +107,44 @@ const removeCategory = (id: number) => {
   } else categories.value = categories.value.filter((_, i) => i !== id)
 }
 
-const CreatePublication = async () => {
+const CreatePublication = async (is_draft: boolean) => {
   const req: PublicationRequest = {
     title: title.value,
     description: description.value,
     user_id: userStore.user!.id,
     background_color: backgroundColor.value,
     categories: categories.value,
+    is_draft: is_draft,
   }
 
   await createPublication(req)
 
-  if (error.value) infoNotification('Ошибка: ' + error.value.toString())
+  if (error.value) infoNotification('❌ ' + error.value)
   else {
-    infoNotification(`Публикация «${req.title}» создана`)
-    await router.push('/')
+    if (is_draft) infoNotification('📥 Публикация сохранена в черновики')
+    else infoNotification(`✅ Создана новая публикация «${req.title}»`)
+    router.back()
   }
 }
 
-const SavePublication = async () => {
+const SavePublication = async (is_draft: boolean) => {
   const req: PublicationUpdateRequest = {
     id: props.id!,
     title: title.value,
     description: description.value,
     background_color: backgroundColor.value,
     categories: currentCategories.value,
+    is_draft: is_draft,
   }
 
-  console.log(req)
   await updatePublication(req)
 
   if (error.value) {
     infoNotification('❌ ' + error.value)
   } else {
-    infoNotification('✅ Публикация успешно обновлена')
-    await router.push('/')
+    if (is_draft) infoNotification('📥 Публикация сохранена в черновики')
+    else infoNotification('✅ Публикация успешно обновлена')
+    router.back()
   }
 }
 
@@ -295,18 +298,21 @@ onUnmounted(() => {
       <button class="light cancel" @click="router.back()">Отмена</button>
       <div class="other-buttons">
         <button
+          @click="id ? SavePublication(true) : CreatePublication(true)"
           class="light archive"
-          :class="{ disabled: !title && !description && !categories.length }"
+          :class="{
+            disabled: !title && !description && !selectedCategories.length
+          }"
         >
           <img src="/icons/archive.svg" alt="archive" />
           В черновики
         </button>
         <button
-          @click="id ? SavePublication() : CreatePublication()"
+          @click="id ? SavePublication(false) : CreatePublication(false)"
           class="dark next"
           :class="{ disabled: !title || !description || !selectedCategories.length }"
         >
-          {{ id ? 'Сохранить' : 'Опубликовать' }}
+          Опубликовать
           <img src="/icons/arr-white.svg" alt="arr" />
         </button>
       </div>

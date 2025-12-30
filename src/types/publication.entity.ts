@@ -12,6 +12,7 @@ export interface PublicationEntity {
   description: string
   user_id: string
   background_color: string
+  is_draft: boolean
 
   created_at: Date
   updated_at: Date
@@ -27,6 +28,7 @@ export interface PublicationRequest {
   description: string
   user_id: string
   background_color?: string
+  is_draft: boolean
 
   categories: Array<PublicationCategoriesRequest>
 }
@@ -35,6 +37,7 @@ export interface PublicationUpdateRequest {
   title: string | null
   description: string | null
   background_color: string | null
+  is_draft: boolean
 
   categories: Array<PublicationCategoriesUpdateRequest> | null
 }

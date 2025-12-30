@@ -55,12 +55,12 @@ export const usePublicationStore = defineStore('publication', {
       }
     },
 
-    async fetchAllPublications(): Promise<PublicationEntity[] | null> {
+    async fetchAllPublications(is_draft: boolean = false): Promise<PublicationEntity[] | null> {
       try {
         this.isLoading = true
         this.error = null
 
-        const response: PublicationEntity[] | ErrorResponse = await publicationService.fetchAll()
+        const response: PublicationEntity[] | ErrorResponse = await publicationService.fetchAll(is_draft)
 
         if (isErrorResponse(response)) {
           this.error = response.error
@@ -76,12 +76,12 @@ export const usePublicationStore = defineStore('publication', {
         this.isLoading = false
       }
     },
-    async fetchPublicationsByUserID(id: string): Promise<PublicationEntity[] | null> {
+    async fetchPublicationsByUserID(id: string, is_draft: boolean = false): Promise<PublicationEntity[] | null> {
       try {
         this.isLoading = true
         this.error = null
 
-        const response: PublicationEntity[] | ErrorResponse = await publicationService.fetchByUserID(id)
+        const response: PublicationEntity[] | ErrorResponse = await publicationService.fetchByUserID(id, is_draft)
         if (isErrorResponse(response)) {
           this.error = response.error
           return null

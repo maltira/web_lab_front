@@ -5,16 +5,16 @@ import type { ErrorResponse, MessageResponse } from '@/types/error.entity.ts'
 class PublicationService {
   private baseURL: string = config.apiUrl
 
-  async fetchAll(): Promise<PublicationEntity[] | ErrorResponse> {
-    const response = await fetch(`${this.baseURL}/publication/all`, {
+  async fetchAll(isDraft: boolean = false): Promise<PublicationEntity[] | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/publication/all?is_draft=${isDraft}`, {
       method: 'GET',
       credentials: 'include',
     })
     return response.json()
   }
 
-  async fetchByUserID(id: string): Promise<PublicationEntity[] | ErrorResponse> {
-    const response = await fetch(`${this.baseURL}/publication/user/${id}/all`, {
+  async fetchByUserID(id: string, isDraft: boolean = false): Promise<PublicationEntity[] | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/publication/user/${id}/all?is_draft=${isDraft}`, {
       method: 'GET',
       credentials: 'include',
     })

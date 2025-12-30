@@ -50,7 +50,7 @@ onMounted(async () => {
         <p v-if="searchPublicationQuery">Найдено публикаций: {{ allPublications.length }}</p>
       </div>
     </div>
-    <div class="list-publication skeleton" v-if="isLoading">
+    <div class="list-publication skeleton" v-if="isLoading && !allPublications">
       <Skeleton
         :width="viewMode === 'single' ? '100%' : '341px'"
         height="360px"
