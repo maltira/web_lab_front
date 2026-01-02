@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { usePublicationStore } from '@/stores/publication.store.ts'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/date_format.ts'
@@ -9,6 +9,7 @@ import PublicationModal from '@/components/Modals/PublicationModal.vue'
 import Skeleton from '@/components/UI/Skeleton.vue'
 import type { PublicationEntity } from '@/types/publication.entity.ts'
 import { useUserStore } from '@/stores/user.store.ts'
+import { filterPublications } from '@/utils/filterPublication.ts'
 
 const userStore = useUserStore()
 const pubViewStore = usePubViewStore()
@@ -28,11 +29,18 @@ const togglePublicationModal = (id: string) => {
   selectedPublication.value = id
 }
 
+const listPublications = computed(() => {
+  return filterPublications(allPublications.value || [], filter.value)
+})
+
 const getPublications = async () => {
   allPublications.value = await fetchPublicationsByUserID(userStore.user!.id, true)
 }
 
 onMounted(async () => {
+  filter.value.date = null
+  filter.value.categories = []
+
   await getPublications()
 })
 </script>
@@ -43,8 +51,8 @@ onMounted(async () => {
       <div class="search-result-header">
         <h1>
           Мои черновики
-          <span v-if="allPublications" :style="{ opacity: 0.3 }"
-            >({{ allPublications.length }})</span
+          <span :style="{ opacity: 0.3 }"
+            >({{ listPublications.length }})</span
           >
         </h1>
       </div>
@@ -66,9 +74,9 @@ onMounted(async () => {
         border-radius="20px"
       />
     </div>
-    <div class="list-publication" v-if="allPublications && allPublications.length > 0">
+    <div class="list-publication" v-if="listPublications.length > 0">
       <PublicationItem
-        v-for="p in allPublications"
+        v-for="p in listPublications"
         :id="p.id"
         :title="p.title"
         :description="p.description"
@@ -84,7 +92,7 @@ onMounted(async () => {
     </div>
 
     <p
-      v-if="!isLoading && allPublications && allPublications.length === 0"
+      v-if="!isLoading && listPublications.length === 0"
       class="search-result-none"
     >
       Ничего не найдено
@@ -96,7 +104,7 @@ onMounted(async () => {
     :pub_id="selectedPublication"
     @close="
       () => {
-        isPublicationOpen = false;
+        isPublicationOpen = false
         getPublications()
       }
     "

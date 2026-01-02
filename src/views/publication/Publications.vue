@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { usePublicationStore } from '@/stores/publication.store.ts'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/date_format.ts'
@@ -7,6 +7,7 @@ import PublicationItem from '@/components/UI/PublicationItem.vue'
 import { usePubViewStore } from '@/stores/view.store.ts'
 import PublicationModal from '@/components/Modals/PublicationModal.vue'
 import Skeleton from '@/components/UI/Skeleton.vue'
+import { filterPublications } from '@/utils/filterPublication.ts'
 
 const pubViewStore = usePubViewStore()
 const publicationStore = usePublicationStore()
@@ -24,6 +25,10 @@ const togglePublicationModal = (id: string) => {
   selectedPublication.value = id
 }
 
+const listPublications = computed(() => {
+  return filterPublications(allPublications.value, filter.value)
+})
+
 onMounted(async () => {
   // Обновляем фильтр
   filter.value.date = null
@@ -31,7 +36,6 @@ onMounted(async () => {
 
   await fetchAllPublications()
 })
-
 </script>
 
 <template>
@@ -72,9 +76,9 @@ onMounted(async () => {
         border-radius="20px"
       />
     </div>
-    <div class="list-publication" v-if="allPublications.length > 0">
+    <div class="list-publication" v-if="listPublications.length > 0">
       <PublicationItem
-        v-for="p in allPublications"
+        v-for="p in listPublications"
         :id="p.id"
         :title="p.title"
         :description="p.description"
@@ -89,7 +93,7 @@ onMounted(async () => {
       </PublicationItem>
     </div>
 
-    <p v-if="!isLoading && allPublications.length === 0" class="search-result-none">
+    <p v-if="!isLoading && listPublications.length === 0" class="search-result-none">
       Ничего не найдено
     </p>
   </div>

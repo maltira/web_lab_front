@@ -2,7 +2,7 @@ import type { PublicationEntity } from '@/types/publication.entity.ts'
 import type { filterType } from '@/stores/publication.store.ts'
 
 
-export const fitlerPublications = (arr: PublicationEntity[], filter: filterType): PublicationEntity[] => {
+export const filterPublications = (arr: PublicationEntity[], filter: filterType): PublicationEntity[] => {
   if (arr.length > 0) {
 
     if (filter.date) {
