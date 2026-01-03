@@ -86,8 +86,7 @@ onMounted(async () => {
         :isWide="viewMode === 'single'"
         @openModal="togglePublicationModal"
         @deleted="getPublications"
-      >
-      </PublicationItem>
+      />
     </div>
 
     <p v-if="!isLoading && listPublications.length === 0" class="search-result-none">
@@ -130,7 +129,6 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 36px;
 
     & > img {
       opacity: 0.7;

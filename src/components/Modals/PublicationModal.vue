@@ -10,9 +10,6 @@ import router from '@/router'
 import { useUserStore } from '@/stores/user.store.ts'
 import { formatDate } from '@/utils/date_format.ts'
 
-const userStore = useUserStore()
-const { user } = storeToRefs(userStore)
-
 interface Props {
   pub_id: string
 }
@@ -39,11 +36,14 @@ const handleClose = () => {
 
 const { infoNotification } = useNotification()
 
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
 const publicationStore = usePublicationStore()
 const { error } = storeToRefs(publicationStore)
-const { fetchPublication } = publicationStore
+const { fetchPublication, checkFavorite, UpdateFavorite } = publicationStore
 
 const publication = ref<PublicationEntity | null>(null)
+const isFavorite = ref<boolean>(false)
 
 const isDeleteModalOpen = ref<boolean>(false)
 const toggleDeleteModal = () => {
@@ -52,6 +52,18 @@ const toggleDeleteModal = () => {
 const editPub = (id: string) => {
   handleClose()
   router.push('/publication/edit/' + id)
+}
+
+const changeFavorite = async () => {
+  isFavorite.value = !isFavorite.value
+
+  await UpdateFavorite(props.pub_id, isFavorite.value)
+
+  if (error.value) {
+    infoNotification('❌ ' + error.value)
+  } else{
+    infoNotification(isFavorite.value ? "Публикация сохранена в избранное" : "Публикация удалена из избранного")
+  }
 }
 
 onMounted(async () => {
@@ -69,6 +81,8 @@ onMounted(async () => {
       pub_modal_content.style.transform = 'scale(1)'
     }, 1)
   }
+
+  isFavorite.value = await checkFavorite(props.pub_id)
 })
 </script>
 
@@ -94,11 +108,7 @@ onMounted(async () => {
           </div>
           <h1>{{ publication.title || 'Заголовок не указан' }}</h1>
           <p>
-            {{
-              publication.created_at
-                ? formatDate(publication.created_at, 'DD/MM/YYYY HH:mm')
-                : 'Дата публикации не указана'
-            }}
+            {{ publication.created_at ? formatDate(publication.created_at, 'DD/MM/YYYY HH:mm') : 'Дата публикации не указана' }}
           </p>
         </div>
         <p v-if="publication" class="description">
@@ -114,6 +124,9 @@ onMounted(async () => {
           <div class="action-item" v-if="user && publication.User.id !== user.id">
             <img src="/icons/add-circle.svg" alt="add" />
           </div>
+          <div class="action-item" v-if="user && !publication.is_draft" @click="changeFavorite">
+            <img :src="isFavorite ? 'icons/saved-fill.svg' : '/icons/saved-outline.svg'" alt="saved" />
+          </div>
           <div
             v-if="user && publication && user.id === publication.User.id"
             class="action-item"
@@ -121,11 +134,7 @@ onMounted(async () => {
           >
             <img src="/icons/edit-2.svg" alt="edit" />
           </div>
-          <div
-            v-if="user && publication && user.id === publication.User.id"
-            class="action-item"
-            @click="toggleDeleteModal"
-          >
+          <div v-if="user && publication && user.id === publication.User.id" class="action-item" @click="toggleDeleteModal">
             <img src="/icons/delete.svg" alt="delete" />
           </div>
         </div>

@@ -45,11 +45,11 @@ const routes: routeInterface[] = [
     hideViews: true,
   },
   { group: 'Главная', path: '/', name: 'Все публикации', icon: 'home.svg' },
-  { group: 'Главная', path: '/categories', name: 'Категории', icon: 'category.svg' },
+  { group: 'Главная', path: '/categories', name: 'Категории', icon: 'category.svg', hideFilters: true, hideViews: true },
   { group: 'Главная', path: '/authors', name: 'Авторы', icon: 'user.svg' },
   { group: 'Личное', path: '/publications/me', name: 'Мои публикации', icon: 'box.svg' },
   { group: 'Личное', path: '/drafts', name: 'Черновики', icon: 'page.svg' },
-  { group: 'Личное', path: '/saved', name: 'Сохраненное', icon: 'saved.svg' },
+  { group: 'Личное', path: '/favorites', name: 'Сохраненное', icon: 'saved-outline.svg' },
   { group: 'Личное', path: '/subscriptions', name: 'Мои подписки', icon: 'user-check.svg' },
 ]
 

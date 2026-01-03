@@ -105,7 +105,7 @@ const UpdateUser = async () => {
     if (error.value) {
       infoNotification('❌ ' + error.value)
     } else {
-      infoNotification('🎉 Профиль успешно обновлён')
+      infoNotification('🎉 Ваш профиль успешно обновлён')
       handleClose()
     }
   }

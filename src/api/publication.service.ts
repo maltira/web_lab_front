@@ -1,5 +1,10 @@
 import config from '@/config'
-import type { PublicationEntity, PublicationRequest, PublicationUpdateRequest } from '@/types/publication.entity.ts'
+import type {
+  FavoritePublicationEntity,
+  PublicationEntity,
+  PublicationRequest,
+  PublicationUpdateRequest,
+} from '@/types/publication.entity.ts'
 import type { ErrorResponse, MessageResponse } from '@/types/error.entity.ts'
 import type { CategorizedGroups } from '@/types/category.entity.ts'
 
@@ -63,6 +68,28 @@ class PublicationService {
       method: 'PUT',
       credentials: 'include',
       body: JSON.stringify(req),
+    })
+    return response.json()
+  }
+
+  async GetAllFavByCurrentUser(): Promise<FavoritePublicationEntity[] | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/publication/saved/all`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+    return response.json()
+  }
+  async CheckIsFavorite(publicationID: string): Promise<boolean> {
+    const response = await fetch(`${this.baseURL}/publication/saved/${publicationID}/check`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+    return response.json()
+  }
+  async UpdateFavorite(publicationID: string, isSave: boolean): Promise<MessageResponse | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/publication/saved/${publicationID}?is_save=${isSave}`, {
+      method: 'POST',
+      credentials: 'include',
     })
     return response.json()
   }

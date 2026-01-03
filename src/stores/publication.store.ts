@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia'
-import type { PublicationEntity, PublicationRequest, PublicationUpdateRequest } from '@/types/publication.entity.ts'
+import type {
+  FavoritePublicationEntity,
+  PublicationEntity,
+  PublicationRequest,
+  PublicationUpdateRequest
+} from '@/types/publication.entity.ts'
 import type { ErrorResponse, MessageResponse } from '@/types/error.entity.ts'
 import { publicationService } from '@/api/publication.service.ts'
 import { isErrorResponse } from '@/utils/response_type.ts'
-import type {
-  CategorizedGroups,
-  PublicationCategoriesRequest,
-} from '@/types/category.entity.ts'
+import type { CategorizedGroups, PublicationCategoriesRequest } from '@/types/category.entity.ts'
 
 export type filterType = {
   date: null | 'month' | 'six months',
@@ -28,15 +30,12 @@ export const usePublicationStore = defineStore('publication', {
   getters: {
     allPublications: (state) => {
       if (!state.searchPublicationQuery) {
-        return [...state.publications].sort(
-          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-        )
+        return [...state.publications].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       }
 
       const query = state.searchPublicationQuery.toLowerCase()
       return state.publications.filter(
-        (pub) =>
-          pub.title.toLowerCase().includes(query) || pub.description.toLowerCase().includes(query),
+        (pub) => pub.title.toLowerCase().includes(query) || pub.description.toLowerCase().includes(query),
       )
     },
   },
@@ -79,12 +78,10 @@ export const usePublicationStore = defineStore('publication', {
         }
 
         return response
-      }
-      catch {
-        this.error = "Ошибка получения категорий, повторите попытку"
+      } catch {
+        this.error = 'Ошибка получения категорий, повторите попытку'
         return null
-      }
-      finally {
+      } finally {
         this.isLoading = false
       }
     },
@@ -93,8 +90,7 @@ export const usePublicationStore = defineStore('publication', {
         this.isLoading = true
         this.error = null
 
-        const response: PublicationEntity[] | ErrorResponse =
-          await publicationService.fetchAll(is_draft)
+        const response: PublicationEntity[] | ErrorResponse = await publicationService.fetchAll(is_draft)
 
         if (isErrorResponse(response)) {
           this.error = response.error
@@ -115,8 +111,7 @@ export const usePublicationStore = defineStore('publication', {
         this.isLoading = true
         this.error = null
 
-        const response: PublicationEntity[] | ErrorResponse =
-          await publicationService.fetchByUserID(id, is_draft)
+        const response: PublicationEntity[] | ErrorResponse = await publicationService.fetchByUserID(id, is_draft)
         if (isErrorResponse(response)) {
           this.error = response.error
           return null
@@ -136,8 +131,7 @@ export const usePublicationStore = defineStore('publication', {
         this.isLoading = true
         this.error = null
 
-        const response: MessageResponse | ErrorResponse =
-          await publicationService.createPublication(req)
+        const response: MessageResponse | ErrorResponse = await publicationService.createPublication(req)
 
         if (isErrorResponse(response)) {
           this.error = response.error
@@ -160,8 +154,7 @@ export const usePublicationStore = defineStore('publication', {
         this.isLoading = true
         this.error = null
 
-        const response: MessageResponse | ErrorResponse =
-          await publicationService.deletePublication(id)
+        const response: MessageResponse | ErrorResponse = await publicationService.deletePublication(id)
         console.log(response)
         if (isErrorResponse(response)) {
           this.error = response.error
@@ -184,8 +177,7 @@ export const usePublicationStore = defineStore('publication', {
         this.isLoading = true
         this.error = null
 
-        const response: MessageResponse | ErrorResponse =
-          await publicationService.updatePublication(req)
+        const response: MessageResponse | ErrorResponse = await publicationService.updatePublication(req)
 
         if (isErrorResponse(response)) {
           this.error = response.error
@@ -198,6 +190,53 @@ export const usePublicationStore = defineStore('publication', {
       } catch {
         this.error = 'Ошибка изменения публикации, повторите попытку'
         return null
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    async getAllFavorites(): Promise<FavoritePublicationEntity[]> {
+      try {
+        this.isLoading = true
+        this.error = null
+
+        const response: FavoritePublicationEntity[] | ErrorResponse = await publicationService.GetAllFavByCurrentUser()
+        if (isErrorResponse(response)) {
+          this.error = response.error
+          return []
+        }
+
+        return response
+      } catch {
+        this.error = 'Ошибка получения избранного, повторите попытку'
+        return []
+      } finally {
+        this.isLoading = false
+      }
+    },
+    async checkFavorite(publicationID: string): Promise<boolean> {
+      try {
+        this.isLoading = true
+        this.error = null
+        return await publicationService.CheckIsFavorite(publicationID)
+      } catch {
+        this.error = 'Ошибка информации об избранном, повторите попытку'
+        return false
+      } finally {
+        this.isLoading = false
+      }
+    },
+    async UpdateFavorite(publicationID: string, isSave: boolean): Promise<void> {
+      try {
+        this.isLoading = true
+        this.error = null
+
+        const response: MessageResponse | ErrorResponse = await publicationService.UpdateFavorite(publicationID, isSave)
+        if (isErrorResponse(response)) {
+          this.error = response.error
+        }
+      } catch {
+        this.error = 'Ошибка действия над сохраненной публикацией, повторите попытку'
       } finally {
         this.isLoading = false
       }

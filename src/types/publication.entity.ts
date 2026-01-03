@@ -21,6 +21,14 @@ export interface PublicationEntity {
   PublicationCategories: PublicationCategories[]
 }
 
+export interface FavoritePublicationEntity {
+  id: string
+  user_id: string
+  pulication_id: string
+
+  Publication: PublicationEntity
+}
+
 
 // ? Сущности для запросов
 export interface PublicationRequest {

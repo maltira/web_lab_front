@@ -134,7 +134,6 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 36px;
 
     & > img {
       opacity: 0.7;

@@ -31,7 +31,7 @@ const routes = [
   [
     { path: '/publications/me', name: 'Мои публикации', icon: 'box.svg' },
     { path: '/drafts', name: 'Черновики', icon: 'page.svg' },
-    { path: '/saved', name: 'Сохраненное', icon: 'saved.svg' },
+    { path: '/favorites', name: 'Сохраненное', icon: 'saved-outline.svg' },
     { path: '/subscriptions', name: 'Мои подписки', icon: 'user-check.svg' },
   ],
 ]
