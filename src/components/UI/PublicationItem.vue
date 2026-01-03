@@ -193,6 +193,7 @@ onUnmounted(() => {
   height: 100%;
 
   cursor: pointer;
+  transition: 200ms ease-in-out;
 
   & > .content_categoies {
     display: flex;
@@ -253,8 +254,9 @@ onUnmounted(() => {
   }
 
   &:hover {
+    border-radius: 28px;
     transform: translateY(1px);
-    box-shadow: 0 8px 24px 0 rgba($black-primary, 0.05);
+    box-shadow: 0 8px 24px 0 rgba($black-primary, 0.04);
   }
 
   &.view-mode-content {

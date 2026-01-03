@@ -1,9 +1,18 @@
 import config from '@/config'
 import type { PublicationEntity, PublicationRequest, PublicationUpdateRequest } from '@/types/publication.entity.ts'
 import type { ErrorResponse, MessageResponse } from '@/types/error.entity.ts'
+import type { CategorizedGroups } from '@/types/category.entity.ts'
 
 class PublicationService {
   private baseURL: string = config.apiUrl
+
+  async getAllCategories(): Promise<CategorizedGroups | ErrorResponse> {
+    const response = await fetch(`${this.baseURL}/publication/categories/all`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+    return response.json()
+  }
 
   async fetchAll(isDraft: boolean = false): Promise<PublicationEntity[] | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/publication/all?is_draft=${isDraft}`, {
@@ -13,7 +22,10 @@ class PublicationService {
     return response.json()
   }
 
-  async fetchByUserID(id: string, isDraft: boolean = false): Promise<PublicationEntity[] | ErrorResponse> {
+  async fetchByUserID(
+    id: string,
+    isDraft: boolean = false,
+  ): Promise<PublicationEntity[] | ErrorResponse> {
     const response = await fetch(`${this.baseURL}/publication/user/${id}/all?is_draft=${isDraft}`, {
       method: 'GET',
       credentials: 'include',

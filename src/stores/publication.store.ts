@@ -3,7 +3,10 @@ import type { PublicationEntity, PublicationRequest, PublicationUpdateRequest } 
 import type { ErrorResponse, MessageResponse } from '@/types/error.entity.ts'
 import { publicationService } from '@/api/publication.service.ts'
 import { isErrorResponse } from '@/utils/response_type.ts'
-import type { PublicationCategoriesRequest } from '@/types/category.entity.ts'
+import type {
+  CategorizedGroups,
+  PublicationCategoriesRequest,
+} from '@/types/category.entity.ts'
 
 export type filterType = {
   date: null | 'month' | 'six months',
@@ -64,6 +67,27 @@ export const usePublicationStore = defineStore('publication', {
       }
     },
 
+    async getAllCategories(): Promise<CategorizedGroups | null> {
+      try {
+        this.isLoading = true
+        this.error = null
+
+        const response: CategorizedGroups | ErrorResponse = await publicationService.getAllCategories()
+        if (isErrorResponse(response)) {
+          this.error = response.error
+          return null
+        }
+
+        return response
+      }
+      catch {
+        this.error = "Ошибка получения категорий, повторите попытку"
+        return null
+      }
+      finally {
+        this.isLoading = false
+      }
+    },
     async fetchAllPublications(is_draft: boolean = false): Promise<PublicationEntity[] | null> {
       try {
         this.isLoading = true
@@ -86,10 +110,7 @@ export const usePublicationStore = defineStore('publication', {
         this.isLoading = false
       }
     },
-    async fetchPublicationsByUserID(
-      id: string,
-      is_draft: boolean = false,
-    ): Promise<PublicationEntity[] | null> {
+    async fetchPublicationsByUserID(id: string, is_draft: boolean = false): Promise<PublicationEntity[] | null> {
       try {
         this.isLoading = true
         this.error = null

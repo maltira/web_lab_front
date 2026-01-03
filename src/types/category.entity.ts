@@ -1,8 +1,12 @@
 // ? Основные сущности
 // Они уже созданы, поэтому обладают ID - их же можно использовать как сущности для обновления данных
+import type { PublicationEntity } from '@/types/publication.entity.ts'
+
 export interface Category {
   id: string
   name: string
+
+  PublicationCategories: PublicationCategories[]
 }
 
 export interface PublicationCategories {
@@ -15,6 +19,7 @@ export interface PublicationCategories {
   display_order: number
 
   Category: Category
+  Publication: PublicationEntity
 }
 
 // ? Сущности для запросов
@@ -41,4 +46,13 @@ export interface PublicationCategoriesUpdateRequest {
   text_color: string
 
   Category: CategoryUpdateRequest
+}
+
+export interface AlphabetGroup {
+  letter: string
+  categories: Category[]
+}
+export interface CategorizedGroups {
+  groups: AlphabetGroup[]
+  other: Category[]
 }

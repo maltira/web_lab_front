@@ -8,6 +8,7 @@ import { useNotification } from '@/composables/useNotification.ts'
 import DeleteModal from '@/components/Modals/DeleteModal.vue'
 import router from '@/router'
 import { useUserStore } from '@/stores/user.store.ts'
+import { formatDate } from '@/utils/date_format.ts'
 
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
@@ -92,6 +93,13 @@ onMounted(async () => {
             <div v-else class="category-item">Категории не указаны</div>
           </div>
           <h1>{{ publication.title || 'Заголовок не указан' }}</h1>
+          <p>
+            {{
+              publication.created_at
+                ? formatDate(publication.created_at, 'DD/MM/YYYY HH:mm')
+                : 'Дата публикации не указана'
+            }}
+          </p>
         </div>
         <p v-if="publication" class="description">
           {{ publication.description || 'Описание не указано' }}
@@ -202,6 +210,10 @@ onMounted(async () => {
     }
     & > h1 {
       @include h1-text;
+    }
+    & > p {
+      @include button-text;
+      opacity: 0.3;
     }
   }
   & > .description {

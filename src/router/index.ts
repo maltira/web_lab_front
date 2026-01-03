@@ -16,6 +16,7 @@ import NewPublication from '@/views/publication/NewPublication.vue'
 import GreetingView from '@/views/GreetingView.vue'
 import MyPublications from '@/views/publication/MyPublications.vue'
 import DraftsView from '@/views/publication/DraftsView.vue'
+import CategoriesView from '@/views/publication/CategoriesView.vue'
 
 const checkAuth = async (to: RouteLocationNormalizedGeneric, from: RouteLocationNormalizedLoadedGeneric, next: NavigationGuardNext) => {
   const userStore = useUserStore()
@@ -71,6 +72,11 @@ const routes: RouteRecordRaw[] = [
     name: 'MyDrafts',
     component: DraftsView,
     beforeEnter: checkAuth,
+  },
+  {
+    path: '/categories',
+    name: 'CategoriesView',
+    component: CategoriesView,
   },
 
   {

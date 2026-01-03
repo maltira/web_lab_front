@@ -142,6 +142,50 @@
   }
 }
 
+@mixin category-counter {
+  @include button-text;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 5px 5px 12px;
+  height: 34px;
+  border-radius: 6px;
+  width: fit-content;
+
+  border: 1px solid rgba($black-primary, 0.1);
+
+  background: transparent;
+  color: rgba($black-primary, 0.7);
+
+  & > .counter {
+    @include tag-text;
+    line-height: 100%;
+
+    color: rgba($black-primary, 0.7);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+
+    background: $gray-primary;
+    border-radius: 4px;
+    height: 24px;
+    min-width: 24px;
+  }
+
+  &:hover {
+    border-radius: 12px;
+    background: $gray-primary;
+
+    & > .counter {
+      border-radius: 8px;
+      background: $white-primary;
+    }
+  }
+}
+
 @mixin info-block {
   @include tag-text;
 

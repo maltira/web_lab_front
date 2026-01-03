@@ -36,7 +36,7 @@ export const formatDate = (date: string | Date, format: string = 'DD/MM/YY'): st
             return `Позавчера ${hours}:${minutes}`
         }
 
-        return `${day}.${month}.${year} ${hours}:${minutes}`
+        return `${hours}:${minutes} ${day}.${month}.${year}`
     }
 
     return d.toLocaleDateString()
