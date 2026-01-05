@@ -18,6 +18,7 @@ import MyPublications from '@/views/publication/MyPublications.vue'
 import DraftsView from '@/views/publication/DraftsView.vue'
 import CategoriesView from '@/views/publication/CategoriesView.vue'
 import FavoritesView from '@/views/publication/FavoritesView.vue'
+import AboutView from '@/views/AboutView.vue'
 
 const checkAuth = async (to: RouteLocationNormalizedGeneric, from: RouteLocationNormalizedLoadedGeneric, next: NavigationGuardNext) => {
   const userStore = useUserStore()
@@ -84,6 +85,15 @@ const routes: RouteRecordRaw[] = [
     name: 'MyFavorites',
     component: FavoritesView,
     beforeEnter: checkAuth,
+  },
+
+  {
+    path: '/about',
+    name: 'AboutView',
+    component: AboutView,
+    meta: {
+      hideHeader: true,
+    },
   },
 
   {
